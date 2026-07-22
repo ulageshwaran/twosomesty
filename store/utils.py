@@ -6,6 +6,9 @@ def get_or_create_cart(request):
     For logged-in users, returns the cart associated with their account.
     For guest users, returns the cart associated with their session key.
     """
+    if not hasattr(request, "user"):
+        return None
+
     if request.user.is_authenticated:
         cart, created = Cart.objects.get_or_create(user=request.user)
     else:

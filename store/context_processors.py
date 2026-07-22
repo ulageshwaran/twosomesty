@@ -21,6 +21,11 @@ def cart_processor(request):
     Passes the shopping cart object and total item count to all templates with prefetched items.
     """
     cart = get_or_create_cart(request)
+    if cart is None:
+        return {
+            "cart": None,
+            "cart_count": 0,
+        }
     items = list(cart.items.select_related('variant', 'variant__product').all())
     cart_count = sum(item.quantity for item in items)
     return {
@@ -32,8 +37,10 @@ def wishlist_processor(request):
     """
     Passes list of wishlisted product IDs to all templates.
     """
-    if request.user.is_authenticated:
-        wishlist_product_ids = set(request.user.wishlists.values_list('product_id', flat=True))
+    user = getattr(request, "user", None)
+
+    if user and user.is_authenticated:
+        wishlist_product_ids = set(user.wishlists.values_list("product_id", flat=True))
     else:
         wishlist_product_ids = set()
     return {
