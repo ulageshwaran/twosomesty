@@ -19,14 +19,36 @@ from .models import Address, Profile, Category, Product, ProductVariant, Cart, C
 from .forms import SignUpForm, UserProfileForm, ProfileForm, AddressForm
 from .utils import merge_carts, get_or_create_cart
 
+from django.db import connection, reset_queries
+from time import perf_counter
+
 class HomeView(TemplateView):
-    template_name = 'store/home.html'
+    template_name = "store/home.html"
 
     def get_context_data(self, **kwargs):
+        reset_queries()
+        start = perf_counter()
+
         context = super().get_context_data(**kwargs)
-        context['products'] = Product.objects.filter(is_active=True).select_related('category').prefetch_related('images', 'variants').order_by('-created_at')[:8]
-        context['carousel_slides'] = CarouselSlide.objects.filter(is_active=True)
-        context['features'] = StoreFeature.objects.filter(is_active=True).order_by('order', 'id')
+
+        context["products"] = (
+            Product.objects.filter(is_active=True)
+            .select_related("category")
+            .prefetch_related("images", "variants")
+            .order_by("-created_at")[:8]
+        )
+
+        context["carousel_slides"] = CarouselSlide.objects.filter(is_active=True)
+        context["features"] = StoreFeature.objects.filter(is_active=True).order_by("order", "id")
+
+        # Force evaluation
+        list(context["products"])
+        list(context["carousel_slides"])
+        list(context["features"])
+
+        print(f"Queries: {len(connection.queries)}")
+        print(f"Time: {perf_counter() - start:.3f}s")
+
         return context
 
 
