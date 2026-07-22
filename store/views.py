@@ -312,6 +312,7 @@ def cart_add_ajax(request):
     cart = get_or_create_cart(request)
     variant_id = request.POST.get('variant_id')
     qty = int(request.POST.get('quantity', 1))
+    buy_now = request.POST.get('buy_now') in ['true', '1', 'True']
     
     variant = get_object_or_404(ProductVariant, id=variant_id)
     
@@ -333,6 +334,9 @@ def cart_add_ajax(request):
         
     # Recalculate cart count
     cart_count = sum(i.quantity for i in cart.items.all())
+    
+    if buy_now:
+        return redirect('store:checkout')
     
     # Check if HTMX request
     if request.headers.get('HX-Request') == 'true':

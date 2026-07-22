@@ -148,32 +148,54 @@
                 </div>
             </div>
 
-            <!-- CTA Actions (Add to Cart / Quantity) -->
+            <!-- CTA Actions (Add to Cart / Buy Now / Quantity) -->
             <form action="{% url 'store:cart_add' %}"
                   method="post"
-                  class="mt-8 border-t border-surface-border/50 pt-6 space-y-4">
+                  class="mt-8 border-t border-surface-border/50 pt-6 space-y-3">
                 {% csrf_token %}
                 <input type="hidden" name="variant_id" :value="activeVariant ? activeVariant.id : ''">
+                <input type="hidden" name="quantity" :value="quantity">
                 
-                <div class="flex items-center justify-between gap-4">
+                <!-- TOP ROW: Quantity Stepper + Add to Cart + Wishlist -->
+                <div class="flex items-center gap-3">
                     <!-- Quantity Stepper -->
-                    <div class="flex items-center bg-surface-slate border border-surface-border rounded-xl" x-show="isAvailable">
-                        <button type="button" @click="if (quantity > 1) quantity--" class="w-12 h-12 flex items-center justify-center font-bold hover:text-brand transition">-</button>
-                        <input type="hidden" name="quantity" :value="quantity">
-                        <span class="w-10 text-center font-bold text-sm" x-text="quantity"></span>
-                        <button type="button" @click="if (quantity < (activeVariant ? activeVariant.stock : 10)) quantity++" class="w-12 h-12 flex items-center justify-center font-bold hover:text-brand transition">+</button>
+                    <div class="flex items-center justify-between bg-surface-card border border-surface-border h-12 w-28 sm:w-32 px-2 flex-shrink-0" x-show="isAvailable">
+                        <button type="button" @click="if (quantity > 1) quantity--" class="w-8 h-8 flex items-center justify-center font-extrabold text-customText-white text-lg hover:text-brand transition">-</button>
+                        <span class="font-extrabold text-customText-white text-sm" x-text="quantity"></span>
+                        <button type="button" @click="if (quantity < (activeVariant ? activeVariant.stock : 10)) quantity++" class="w-8 h-8 flex items-center justify-center font-extrabold text-customText-white text-lg hover:text-brand transition">+</button>
                     </div>
 
-                    <!-- Add to Cart -->
+                    <!-- Add to Cart Button -->
                     <button type="submit"
-                            class="flex-grow py-4 px-6 rounded-xl font-bold transition flex items-center justify-center space-x-2"
-                            :class="isAvailable ? 'bg-brand text-white hover:bg-brand-hover hover:scale-[1.02] transform' : 'bg-[#EAE4D9] text-[#5C5852] border border-[#A7A29A] cursor-not-allowed'"
+                            name="buy_now" value="false"
+                            hx-post="{% url 'store:cart_add' %}"
+                            hx-swap="none"
+                            class="flex-1 h-12 px-4 bg-black text-white hover:bg-neutral-800 font-extrabold transition flex items-center justify-center space-x-2 text-xs sm:text-sm uppercase tracking-wider"
+                            :class="isAvailable ? 'bg-black text-white hover:bg-neutral-800 cursor-pointer' : 'bg-neutral-300 text-neutral-600 border border-neutral-400 cursor-not-allowed'"
                             :disabled="!isAvailable">
-                        <span x-text="isAvailable ? 'Add to Cart' : (!selectedSize || !selectedColor ? 'Select Size & Color' : 'Out of Stock')"></span>
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13v4M10 15h4"></path>
+                        </svg>
+                        <span x-text="isAvailable ? 'Add to cart' : (!selectedSize || !selectedColor ? 'Select Size & Color' : 'Out of Stock')"></span>
                     </button>
 
                     <!-- Add to Wishlist -->
-                    {% include "store/partials/wishlist_button.html" with product=product %}
+                    <div class="flex-shrink-0 flex items-center justify-center h-12">
+                        {% include "store/partials/wishlist_button.html" with product=product %}
+                    </div>
+                </div>
+
+                <!-- BOTTOM ROW: Buy it now Button (Full Width) -->
+                <div>
+                    <button type="submit"
+                            name="buy_now" value="true"
+                            class="w-full h-12 px-6 bg-brand text-white hover:bg-brand-hover font-extrabold transition flex items-center justify-center space-x-2 text-xs sm:text-sm uppercase tracking-widest shadow-md"
+                            :class="isAvailable ? 'bg-brand text-white hover:bg-brand-hover cursor-pointer' : 'bg-neutral-300 text-neutral-600 border border-neutral-400 cursor-not-allowed'"
+                            :disabled="!isAvailable">
+                        <span>⚡</span>
+                        <span x-text="isAvailable ? 'Buy it now' : (!selectedSize || !selectedColor ? 'Select Size & Color' : 'Out of Stock')"></span>
+                    </button>
                 </div>
             </form>
 
