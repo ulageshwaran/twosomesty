@@ -336,7 +336,7 @@ def cart_add_ajax(request):
     cart_count = sum(i.quantity for i in cart.items.all())
     
     if buy_now:
-        return redirect('store:checkout')
+        return redirect('store:cart_detail')
     
     # Check if HTMX request
     if request.headers.get('HX-Request') == 'true':
