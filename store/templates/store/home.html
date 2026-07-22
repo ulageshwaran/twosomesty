@@ -6,6 +6,7 @@
 {% block content %}
 <div class="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden mb-12 sm:mb-16 bg-[#121212]" x-data="{ 
     activeSlide: 0, 
+    touchStartX: 0,
     slides: [
         {% if carousel_slides %}
             {% for slide in carousel_slides %}
@@ -57,16 +58,33 @@
     next() {
         if (this.slides.length > 1) {
             this.activeSlide = (this.activeSlide + 1) % this.slides.length;
+            this.resetTimer();
+        }
+    },
+    prev() {
+        if (this.slides.length > 1) {
+            this.activeSlide = (this.activeSlide - 1 + this.slides.length) % this.slides.length;
+            this.resetTimer();
+        }
+    },
+    resetTimer() {
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+        if (this.slides.length > 1) {
+            this.timer = setInterval(() => {
+                this.activeSlide = (this.activeSlide + 1) % this.slides.length;
+            }, 5000);
         }
     },
     init() {
-        if (this.slides.length > 1) {
-            this.timer = setInterval(() => { this.next(); }, 4000);
-        }
+        this.resetTimer();
     }
 }" x-init="init()">
     <!-- Slides Container -->
-    <div class="relative h-[400px] sm:h-[650px] md:h-[650px] overflow-hidden">
+    <div class="relative h-[400px] sm:h-[650px] md:h-[650px] overflow-hidden"
+         @touchstart="touchStartX = $event.touches[0].clientX"
+         @touchend="if (touchStartX - $event.changedTouches[0].clientX > 50) next(); if ($event.changedTouches[0].clientX - touchStartX > 50) prev();">
         <template x-for="(slide, index) in slides" :key="index">
             <div x-show="activeSlide === index" 
                  x-transition:enter="transition-opacity ease-in-out duration-1000"
@@ -111,7 +129,7 @@
     <!-- Indicators -->
     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-20">
         <template x-for="(slide, index) in slides" :key="index">
-            <button @click="activeSlide = index" class="w-8 h-1.5 rounded-full transition-all duration-300"
+            <button @click="activeSlide = index; resetTimer()" class="w-8 h-1.5 rounded-full transition-all duration-300"
                 :class="activeSlide === index ? 'bg-brand' : 'bg-white/20 hover:bg-white/40'"></button>
         </template>
     </div>
