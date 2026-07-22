@@ -29,6 +29,27 @@ class StoreConfig(AppConfig):
                     cursor.execute("INSERT OR IGNORE INTO django_migrations (app, name, applied) VALUES ('store', '0012_order_shipping_partner_tracking_number', datetime('now'));")
                 except Exception:
                     pass
+
+                # Self-healing auto-create and seed store_announcementbar table
+                try:
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS store_announcementbar (
+                            id integer PRIMARY KEY AUTOINCREMENT,
+                            text varchar(255) NOT NULL,
+                            is_active bool NOT NULL,
+                            created_at datetime NOT NULL,
+                            updated_at datetime NOT NULL
+                        );
+                    """)
+                    cursor.execute("SELECT COUNT(*) FROM store_announcementbar;")
+                    if cursor.fetchone()[0] == 0:
+                        cursor.execute("""
+                            INSERT INTO store_announcementbar (text, is_active, created_at, updated_at)
+                            VALUES ('⚡ Chennai Delivery in 1-3 Days • Buy 2 Get 1 Free • Express Shipping across Tamil Nadu ⚡', 1, datetime('now'), datetime('now'));
+                        """)
+                except Exception:
+                    pass
+
                 conn.commit()
                 conn.close()
             except Exception:

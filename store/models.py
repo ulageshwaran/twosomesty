@@ -530,3 +530,17 @@ class StoreFeature(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# 16. AnnouncementBar Model
+class AnnouncementBar(models.Model):
+    text = models.CharField(
+        max_length=255, 
+        default="⚡ Chennai Delivery in 1-3 Days • Buy 2 Get 1 Free • Express Shipping across Tamil Nadu ⚡"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Announcement: {self.text[:40]}..."

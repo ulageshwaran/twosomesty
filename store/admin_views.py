@@ -10,7 +10,7 @@ from decimal import Decimal
 
 from .models import (
     Product, ProductImage, ProductVariant, Category, Order, OrderItem, 
-    Coupon, StoreFeature, CarouselSlide, Profile, ProductReview
+    Coupon, StoreFeature, CarouselSlide, Profile, ProductReview, AnnouncementBar
 )
 from .mixins import StaffRequiredMixin
 from .forms import ProductForm
@@ -52,6 +52,9 @@ class AdminDashboardView(StaffRequiredMixin, View):
         # Recent 10 orders
         recent_orders = Order.objects.all().order_by('-created_at')[:10]
 
+        # Get current announcement bar settings
+        announcement = AnnouncementBar.objects.first()
+
         context = {
             'total_revenue': total_revenue,
             'paid_orders_count': paid_orders_count,
@@ -61,8 +64,24 @@ class AdminDashboardView(StaffRequiredMixin, View):
             'low_stock_count': low_stock_count,
             'low_stock_variants': low_stock_variants[:6],
             'recent_orders': recent_orders,
+            'announcement': announcement,
         }
         return render(request, 'store/admin/dashboard.html', context)
+
+    def post(self, request):
+        text = request.POST.get('announcement_text', '').strip()
+        is_active = request.POST.get('announcement_active') == 'on'
+
+        announcement = AnnouncementBar.objects.first()
+        if announcement:
+            announcement.text = text
+            announcement.is_active = is_active
+            announcement.save()
+        else:
+            AnnouncementBar.objects.create(text=text, is_active=is_active)
+
+        messages.success(request, "Announcement bar text updated successfully!")
+        return redirect('store:admin_dashboard')
 
 
 # 3. Product & Inventory Management Views

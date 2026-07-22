@@ -10,7 +10,7 @@
     {% if products %}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
             {% for product in products %}
-                <div class="group relative flex flex-col justify-between bg-surface-card border border-surface-border rounded-3xl overflow-hidden hover:border-brand/50 transition duration-500">
+                <div class="group relative flex flex-col justify-between bg-surface-card border border-surface-border overflow-hidden hover:border-brand/50 transition duration-500">
                     <a href="{% url 'store:product_detail' product.slug %}" class="block relative aspect-square bg-surface-slate overflow-hidden">
                         <!-- Product Main Image -->
                         {% if product.images.first %}

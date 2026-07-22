@@ -37,7 +37,7 @@
             }
         }">
             <!-- Main Image Frame with Swipe Support and Navigation Arrows -->
-            <div class="aspect-square bg-surface-card border border-surface-border rounded-3xl overflow-hidden relative group"
+            <div class="aspect-square bg-surface-card border border-surface-border overflow-hidden relative group"
                  @touchstart="touchStartX = $event.touches[0].clientX"
                  @touchend="if ($event.changedTouches[0].clientX - touchStartX > 50) prevImage(); else if (touchStartX - $event.changedTouches[0].clientX > 50) nextImage();">
                 
@@ -70,7 +70,7 @@
                     {% for img in product.images.all %}
                         <button type="button"
                                 @click="activeIndex = {{ forloop.index0 }}" 
-                                class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-surface-card border border-surface-border rounded-2xl overflow-hidden hover:border-brand focus:outline-none transition-all duration-300"
+                                class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-surface-card border border-surface-border overflow-hidden hover:border-brand focus:outline-none transition-all duration-300"
                                 :class="{ 'border-brand ring-2 ring-brand/20': activeIndex === {{ forloop.index0 }} }">
                             <img src="{{ img.thumbnail_url }}" alt="Thumbnail" loading="lazy" decoding="async" class="object-cover w-full h-full">
                         </button>
@@ -84,7 +84,7 @@
             <div class="space-y-6">
                 <!-- Category/Brand & Stars -->
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-brand uppercase tracking-wider">{{ product.brand|default:"Twosomesty" }} Streetwear</span>
+                    <span class="text-xs font-bold text-brand uppercase tracking-wider">Premium Wear</span>
                     <div class="flex items-center space-x-1 text-brand-hover text-sm">
                         {% for i in "12345" %}
                             {% if forloop.counter <= product.average_rating %}
@@ -357,7 +357,7 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="text-center py-10 bg-surface-card border border-surface-border rounded-3xl text-xs text-customText-gray">
+                <div class="text-center py-10 bg-surface-card border border-surface-border text-xs text-customText-gray">
                     No reviews yet for this product. Fit, style, and print ratings from shoppers will appear here.
                 </div>
             {% endif %}
@@ -370,7 +370,7 @@
             <h2 class="text-2xl font-extrabold text-customText-white font-fredoka mb-8">You May Also Like</h2>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {% for related in related_products %}
-                    <div class="group relative flex flex-col justify-between bg-surface-card border border-surface-border rounded-3xl overflow-hidden hover:border-brand/50 transition duration-500">
+                    <div class="group relative flex flex-col justify-between bg-surface-card border border-surface-border overflow-hidden hover:border-brand/50 transition duration-500">
                         <a href="{% url 'store:product_detail' related.slug %}" class="block relative aspect-square bg-surface-slate overflow-hidden">
                             {% if related.images.first %}
                                 <img src="{{ related.images.first.image.url }}" alt="{{ related.name }}" class="object-cover w-full h-full group-hover:scale-105 transition duration-500">

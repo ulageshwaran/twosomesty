@@ -101,6 +101,7 @@ TEMPLATES = [
                 'store.context_processors.cart_processor',
                 'store.context_processors.wishlist_processor',
                 'store.context_processors.logo_processor',
+                'store.context_processors.announcement_processor',
             ],
         },
     },

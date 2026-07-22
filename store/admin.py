@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Profile, Address, Category, Product, ProductImage, 
-    ProductVariant, Cart, CartItem, Coupon, Order, OrderItem, Wishlist, ProductReview, CarouselSlide, StoreFeature
+    ProductVariant, Cart, CartItem, Coupon, Order, OrderItem, Wishlist, ProductReview, CarouselSlide, StoreFeature, AnnouncementBar
 )
 
 # Inlines
@@ -159,3 +159,10 @@ class StoreFeatureAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;" />', obj.image.url)
         return "-"
     feature_image_thumbnail.short_description = 'Icon/Image'
+
+
+@admin.register(AnnouncementBar)
+class AnnouncementBarAdmin(admin.ModelAdmin):
+    list_display = ('text', 'is_active', 'updated_at')
+    list_editable = ('is_active',)
+    search_fields = ('text',)

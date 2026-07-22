@@ -60,3 +60,18 @@ def logo_processor(request):
         'brand_logo_url': brand_logo_url,
         'logo_footer_url': logo_footer_url,
     }
+
+def announcement_processor(request):
+    """
+    Passes the active announcement bar text to all templates.
+    """
+    from .models import AnnouncementBar
+    try:
+        announcement = AnnouncementBar.objects.filter(is_active=True).first()
+        announcement_text = announcement.text if announcement else None
+    except Exception:
+        announcement_text = None
+        
+    return {
+        'announcement_text': announcement_text
+    }
