@@ -143,14 +143,14 @@
         <div class="animate-marquee whitespace-nowrap flex items-center">
             {% for i in "12345678" %}
                 <span class="mx-6 text-xs font-bold text-white tracking-widest uppercase">{{ announcement_text }}</span>
-                <span class="text-brand text-xs font-extrabold">•</span>
+                
             {% endfor %}
         </div>
         <!-- Track 2 (Appended seamlessly to create a gapless infinite loop) -->
         <div class="absolute top-0 animate-marquee2 whitespace-nowrap flex items-center">
             {% for i in "12345678" %}
                 <span class="mx-6 text-xs font-bold text-white tracking-widest uppercase">{{ announcement_text }}</span>
-                <span class="text-brand text-xs font-extrabold">•</span>
+                
             {% endfor %}
         </div>
     </div>
