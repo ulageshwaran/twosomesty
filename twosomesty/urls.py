@@ -29,7 +29,9 @@ if settings.DEBUG:
 
 urlpatterns += [
     path('', include('store.urls')),
+    path("silk/", include("silk.urls", namespace="silk")),
 ]
+
 
 handler404 = 'store.views.custom_404_view'
 handler500 = 'store.views.custom_500_view'
