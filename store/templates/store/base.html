@@ -248,7 +248,7 @@
                     <!-- Desktop: Logo -->
                     <div class="hidden md:block flex-shrink-0">
                         <a href="{% url 'store:home' %}" class="flex items-center">
-                            <img src="{% static 'images/brand_logo.png' %}" alt="Twosome Logo" class="h-12 sm:h-14 md:h-16 w-auto object-contain">
+                            <img src="{{ brand_logo_url }}" alt="Twosome Logo" class="h-12 sm:h-14 md:h-16 w-auto object-contain">
                         </a>
                     </div>
 
@@ -318,7 +318,7 @@
                 <!-- MOBILE CENTER: Logo (absolutely centered, hidden on desktop) -->
                 <div class="md:hidden absolute left-1/2 -translate-x-1/2 flex-shrink-0 pointer-events-none">
                     <a href="{% url 'store:home' %}" class="block pointer-events-auto">
-                        <img src="{% static 'images/brand_logo.png' %}" alt="Twosome Logo" class="h-11 sm:h-13 w-auto object-contain">
+                        <img src="{{ brand_logo_url }}" alt="Twosome Logo" class="h-11 sm:h-13 w-auto object-contain">
                     </a>
                 </div>
 
@@ -561,7 +561,7 @@
                 <!-- Col 1: Brand -->
                 <div class="space-y-1">
                     <a href="{% url 'store:home' %}" class="inline-block">
-                        <img src="{% static 'images/logo_footer.png' %}" alt="Twosomesty Logo" class="h-20 w-auto object-contain mx-auto">
+                        <img src="{{ logo_footer_url }}" alt="Twosomesty Logo" class="h-20 w-auto object-contain mx-auto">
                     </a>
                     <p class="leading-relaxed"><span class="text-brand font-heading text-lg tracking-wider uppercase block mb-2 ">OWN YOURLOOK.</span>TWOSOME IS YOUR DESTINATION FOR PREMIUM STREETWEAR OVERSIZED TEES, BAGGY PANTS, JACKETS, AND JERSEYS CURATED FOR THE BOLD. WEAR WHAT SPEAKS FOR YOU.<span class="text-brand font-medium text-5 tracking-wide uppercase block mt-2">STAND OUT - STAY ORIGINAL</span></p>
                 </div>
