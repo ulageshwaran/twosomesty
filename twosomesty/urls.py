@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('twosomeadmin/', admin.site.urls),
+    path("silk/", include("silk.urls", namespace="silk")),
 ]
 
 if settings.DEBUG:
@@ -31,9 +32,6 @@ urlpatterns += [
     path('', include('store.urls')),
 ]
 
-urlpatterns += [
-    path("silk/", include("silk.urls", namespace="silk")),
-]
 
 handler404 = 'store.views.custom_404_view'
 handler500 = 'store.views.custom_500_view'
