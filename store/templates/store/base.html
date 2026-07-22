@@ -1,0 +1,603 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="overflow-x-hidden max-w-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Twosomesty | Trendy Streetwear & Fashion in Chennai{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Cloudinary CDN Preconnect -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;600;700&family=Fredoka:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        heading: ['Roboto Condensed', 'sans-serif'],
+                        subheading: ['Roboto Condensed', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif'],
+                        roboto: ['Roboto Condensed', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            DEFAULT: '#d20a2e',      // Burnt Copper (Highlight / CTA)
+                            hover: '#d20a2e',        // Deep Olive (Hover / Accent)
+                            accent: '#d20a2e',       // Deep Olive (Distinctive Accent)
+                        },
+                        surface: {
+                            bg: '#F5F1E8',           // Warm Ivory (Clean Background)
+                            slate: '#FFFFFF',        // White for Headers/Footers
+                            card: '#FFFFFF',         // White for Cards
+                            border: '#A7A29A',       // Stone Grey (Neutral Secondary Color)
+                        },
+                        customText: {
+                            white: '#121212',        // Midnight Black (Primary Text / Brand)
+                            gray: '#5C5852',         // Stone Grey (Neutral Secondary Color, darkened for contrast)
+                        },
+                        rose: {
+                            50: '#FDF8F5',
+                            100: '#FCEFE9',
+                            400: '#C77A50',
+                            500: '#d20a2e',          // Map rose-500 to Brand Red
+                            600: '#b00824',
+                        },
+                        emerald: {
+                            50: '#F4F6F4',
+                            100: '#E9ECE9',
+                            400: '#4F5D4B',
+                            500: '#3F4A3C',          // Map emerald-500 to Deep Olive
+                            600: '#333D31',
+                        },
+                        red: {
+                            50: '#FDF8F5',
+                            100: '#FCEFE9',
+                            400: '#C77A50',
+                            500: '#d20a2e',          // Map red-500 to Brand Red
+                            600: '#b00824',
+                        },
+                        blue: {
+                            50: '#F4F6F4',
+                            100: '#E9ECE9',
+                            400: '#4F5D4B',
+                            500: '#3F4A3C',          // Map blue-500 to Deep Olive
+                            600: '#333D31',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F1E8;
+            color: #121212;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Anton', sans-serif;
+            color: #121212;
+            letter-spacing: 0.05em;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* Support solid dark backgrounds for CTA elements so text stays white */
+        .bg-brand,
+        .bg-brand-hover,
+        .bg-brand-accent,
+        .bg-rose-500,
+        .bg-emerald-500,
+        .bg-red-500,
+        .bg-blue-500,
+        .bg-blue-600,
+        button[type="submit"]:not(:disabled),
+        .btn,
+        #cart-badge,
+        .badge {
+            color: #FFFFFF !important;
+        }
+
+        /* Ensure SVG elements inside buttons/badges have correct color */
+        .bg-brand svg,
+        .bg-brand-hover svg,
+        .bg-brand-accent svg,
+        .bg-rose-500 svg,
+        .bg-emerald-500 svg,
+        .bg-red-500 svg,
+        .bg-blue-500 svg,
+        .bg-blue-600 svg {
+            stroke: #FFFFFF !important;
+        }
+
+        /* If text-customText-white is inside a colored background element, force it to stay white */
+        .bg-brand .text-customText-white,
+        .bg-brand-hover .text-customText-white,
+        .bg-brand-accent .text-customText-white,
+        .bg-rose-500 .text-customText-white,
+        .bg-emerald-500 .text-customText-white,
+        .bg-red-500 .text-customText-white,
+        .bg-blue-500 .text-customText-white,
+        button[type="submit"] .text-customText-white,
+        a.bg-brand .text-customText-white,
+        a.bg-brand-hover .text-customText-white,
+        a.bg-brand-accent .text-customText-white {
+            color: #FFFFFF !important;
+        }
+
+        /* Clean form styles matching Warm Ivory and Midnight Black palette */
+        input, textarea, select {
+            background-color: #FFFFFF !important;
+            color: #121212 !important;
+            border-color: #A7A29A !important;
+        }
+        input::placeholder, textarea::placeholder {
+            color: #5C5852 !important;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #d20a2e !important;
+        }
+        /* ===== Dark Navbar (#0B0F14) ===== */
+        header.site-header {
+            background-color: #0B0F14 !important;
+            border-bottom-color: rgba(255,255,255,0.08) !important;
+        }
+        header.site-header a,
+        header.site-header button,
+        header.site-header nav a {
+            color: #E8E6E1 !important;
+        }
+        header.site-header a:hover,
+        header.site-header button:hover,
+        header.site-header nav a:hover {
+            color: #d20a2e !important;
+        }
+        header.site-header svg {
+            stroke: #E8E6E1;
+        }
+        header.site-header button:hover svg,
+        header.site-header a:hover svg {
+            stroke: #d20a2e;
+        }
+        header.site-header input {
+            background-color: rgba(255,255,255,0.07) !important;
+            color: #E8E6E1 !important;
+            border-color: rgba(255,255,255,0.15) !important;
+        }
+        header.site-header input::placeholder {
+            color: rgba(232,230,225,0.45) !important;
+        }
+    </style>
+    <!-- HTMX CDN -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <!-- Configure HTMX to send Django CSRF token on every mutating request -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.body.addEventListener('htmx:configRequest', function (evt) {
+                const csrfToken = document.cookie.split(';')
+                    .map(c => c.trim())
+                    .find(c => c.startsWith('csrftoken='));
+                if (csrfToken) {
+                    evt.detail.headers['X-CSRFToken'] = csrfToken.split('=')[1];
+                }
+            });
+        });
+    </script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-surface-bg text-customText-white flex flex-col min-h-screen overflow-x-hidden max-w-full w-full">
+
+    <!-- Header Navigation -->
+    <header class="site-header sticky top-0 z-50 bg-[#0E131A] border-b border-white/5 backdrop-blur-md w-full"
+        x-data="{ mobileOpen: false, searchOpen: false }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative flex items-center justify-between h-16 sm:h-18 gap-4">
+
+                <!-- DESKTOP LEFT: Logo + Nav (flex-shrink-0 so it NEVER collapses or overlaps) -->
+                <div class="flex items-center gap-4 flex-shrink-0">
+
+                    <!-- Mobile: Hamburger Toggle -->
+                    <button @click="mobileOpen = !mobileOpen; searchOpen = false"
+                        class="md:hidden p-2 rounded-lg text-customText-gray hover:text-customText-white hover:bg-surface-card transition"
+                        :aria-label="mobileOpen ? 'Close menu' : 'Open menu'">
+                        <!-- Hamburger icon -->
+                        <svg x-show="!mobileOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <!-- X icon -->
+                        <svg x-show="mobileOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Mobile: Search Icon -->
+                    <button @click="searchOpen = !searchOpen; mobileOpen = false"
+                        class="md:hidden relative p-2 text-customText-gray hover:text-customText-white transition"
+                        title="Search">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Desktop: Logo -->
+                    <div class="hidden md:block flex-shrink-0">
+                        <a href="{% url 'store:home' %}" class="flex items-center">
+                            <img src="{% static 'images/brand_logo.png' %}" alt="Twosome Logo" class="h-12 sm:h-14 md:h-16 w-auto object-contain">
+                        </a>
+                    </div>
+
+                    <!-- Desktop Nav Items: Responsive 2-5 Primary categories inline + More Dropdown -->
+                    <nav class="hidden md:flex items-center gap-3 lg:gap-5 ml-2" x-data="{ catDropdown: false }">
+                        <a href="{% url 'store:home' %}"
+                            class="text-xs lg:text-sm font-semibold hover:text-brand transition duration-300 whitespace-nowrap">Home</a>
+
+                        <!-- Responsive Categories inline (2 on md, 3 on lg, 5 on xl) -->
+                        {% for cat in nav_categories %}
+                        {% if forloop.counter <= 2 %}
+                        <a href="{% url 'store:category_detail' cat.slug %}"
+                            class="text-xs lg:text-sm font-semibold hover:text-brand transition duration-300 whitespace-nowrap">
+                            {{ cat.name }}
+                        </a>
+                        {% elif forloop.counter <= 3 %}
+                        <a href="{% url 'store:category_detail' cat.slug %}"
+                            class="hidden lg:inline-block text-xs lg:text-sm font-semibold hover:text-brand transition duration-300 whitespace-nowrap">
+                            {{ cat.name }}
+                        </a>
+                        {% elif forloop.counter <= 5 %}
+                        <a href="{% url 'store:category_detail' cat.slug %}"
+                            class="hidden xl:inline-block text-xs lg:text-sm font-semibold hover:text-brand transition duration-300 whitespace-nowrap">
+                            {{ cat.name }}
+                        </a>
+                        {% endif %}
+                        {% endfor %}
+
+                        <!-- Categories / More Dropdown -->
+                        {% if nav_categories %}
+                        <div class="relative">
+                            <button @click="catDropdown = !catDropdown" @click.away="catDropdown = false"
+                                    class="flex items-center gap-1 text-xs lg:text-sm font-semibold hover:text-brand transition duration-300 focus:outline-none whitespace-nowrap cursor-pointer">
+                                <span>More</span>
+                                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="catDropdown ? 'rotate-180 text-brand' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+
+                            <!-- Floating Dropdown Menu for All Categories -->
+                            <div x-show="catDropdown" x-cloak
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 translate-y-2"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 translate-y-2"
+                                 class="absolute left-0 mt-3 w-56 bg-[#0E131A] border border-white/10 rounded-2xl shadow-2xl py-2 z-50">
+                                <div class="px-4 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider font-heading border-b border-white/5">
+                                    All Categories
+                                </div>
+                                <div class="py-1 max-h-64 overflow-y-auto scrollbar-none">
+                                    {% for cat in nav_categories %}
+                                    <a href="{% url 'store:category_detail' cat.slug %}"
+                                       class="flex items-center justify-between px-4 py-2.5 text-xs text-slate-200 hover:text-white hover:bg-white/10 transition font-medium">
+                                        <span>{{ cat.name }}</span>
+                                        <span class="text-slate-500 text-xs">&rarr;</span>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </nav>
+                </div>
+
+                <!-- MOBILE CENTER: Logo (absolutely centered, hidden on desktop) -->
+                <div class="md:hidden absolute left-1/2 -translate-x-1/2 flex-shrink-0 pointer-events-none">
+                    <a href="{% url 'store:home' %}" class="block pointer-events-auto">
+                        <img src="{% static 'images/brand_logo.png' %}" alt="Twosome Logo" class="h-11 sm:h-13 w-auto object-contain">
+                    </a>
+                </div>
+
+                <!-- DESKTOP CENTER: Search Bar (Always visible on all tablet and desktop screens) -->
+                <div class="hidden md:block w-36 sm:w-44 lg:w-56 xl:w-64 flex-shrink-0 relative" x-data="{ open: false }">
+                    <form method="get" action="{% url 'store:search' %}">
+                        <input type="text" name="q" placeholder="Search streetwear..." value="{{ q|default:'' }}"
+                            hx-get="{% url 'store:search_suggest' %}" hx-trigger="keyup changed delay:300ms, search"
+                            hx-target="#search-results-dropdown-desktop" hx-swap="innerHTML" @focus="open = true"
+                            @click.away="open = false"
+                            class="w-full bg-surface-card border border-surface-border rounded-xl px-3.5 py-1.5 text-xs text-customText-white placeholder-customText-gray focus:outline-none focus:border-brand transition">
+                    </form>
+                    <div id="search-results-dropdown-desktop" x-show="open" x-cloak
+                        class="absolute top-11 right-0 w-[360px] z-50">
+                    </div>
+                </div>
+
+                <!-- RIGHT: Wishlist + Cart + Desktop Auth Dropdown -->
+                <div class="flex items-center space-x-3 flex-shrink-0">
+
+                    <!-- Wishlist -->
+                    <a href="{% url 'store:wishlist' %}"
+                        class="relative p-2 text-customText-gray hover:text-customText-white transition"
+                        title="My Wishlist">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                            </path>
+                        </svg>
+                        {% if wishlist_product_ids %}
+                        <span
+                            class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xxs font-extrabold leading-none text-customText-white bg-rose-500 rounded-full">
+                            {{ wishlist_product_ids|length }}
+                        </span>
+                        {% endif %}
+                    </a>
+
+                    <!-- Cart -->
+                    <a href="{% url 'store:cart_detail' %}"
+                        class="relative p-2 text-customText-gray hover:text-customText-white transition"
+                        title="My Cart">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                        </svg>
+                        <span id="cart-badge"
+                            class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xxs font-extrabold leading-none text-customText-white bg-brand rounded-full">
+                            {{ cart_count }}
+                        </span>
+                    </a>
+
+                    <!-- Desktop: User Menu Dropdown -->
+                    {% if user.is_authenticated %}
+                    <div class="relative hidden md:block" x-data="{ userMenu: false }">
+                        <button @click="userMenu = !userMenu" @click.away="userMenu = false"
+                                class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#00FCFE]/60 text-customText-white transition cursor-pointer">
+                            <div class="w-6 h-6 rounded-full bg-[#00FCFE]/20 text-[#00FCFE] border border-[#00FCFE]/30 flex items-center justify-center font-bold text-xs uppercase">
+                                {{ user.username|first }}
+                            </div>
+                            <span class="text-xs font-semibold max-w-[90px] truncate hidden xl:inline">{{ user.username }}</span>
+                            {% if user.is_staff or user.is_superuser %}
+                            <span class="text-[9px] bg-[#00FCFE]/20 text-[#00FCFE] border border-[#00FCFE]/40 font-bold px-1.5 py-0.5 rounded tracking-wide">ADMIN</span>
+                            {% endif %}
+                            <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="userMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div x-show="userMenu" x-cloak
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 translate-y-2"
+                             class="absolute right-0 mt-3 w-48 bg-[#0E131A] border border-white/10 rounded-2xl shadow-2xl py-2 z-50 divide-y divide-white/5">
+                            <div class="px-4 py-2 border-b border-white/5">
+                                <p class="text-xs font-semibold text-white truncate">{{ user.username }}</p>
+                                <p class="text-[10px] text-slate-400 truncate">{{ user.email }}</p>
+                            </div>
+                            <div class="py-1">
+                                {% if user.is_staff or user.is_superuser %}
+                                <a href="{% url 'store:admin_dashboard' %}"
+                                   class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-[#00FCFE] hover:bg-white/10 transition">
+                                    <span>⚡</span> Admin Panel
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'store:profile' %}"
+                                   class="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-200 hover:text-[#00FCFE] hover:bg-white/10 transition">
+                                    <span>👤</span> My Profile
+                                </a>
+                                <a href="{% url 'store:order_history' %}"
+                                   class="flex items-center gap-2 px-4 py-2 text-xs font-medium text-slate-200 hover:text-[#00FCFE] hover:bg-white/10 transition">
+                                    <span>📦</span> My Orders
+                                </a>
+                            </div>
+                            <div class="py-1">
+                                <a href="{% url 'store:logout' %}"
+                                   class="flex items-center gap-2 px-4 py-2 text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition">
+                                    <span>🚪</span> Log Out
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="hidden md:flex items-center gap-3">
+                        <a href="{% url 'store:login' %}"
+                            class="text-xs sm:text-sm font-semibold hover:text-brand transition duration-300 whitespace-nowrap">Log In</a>
+                        <a href="{% url 'store:signup' %}"
+                            class="text-xs sm:text-sm font-semibold px-4 py-2 rounded-full bg-brand text-customText-white hover:bg-brand-hover hover:scale-105 transition duration-300 transform whitespace-nowrap">Sign Up</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Mobile: Search Bar (toggled by search icon) -->
+            <div x-show="searchOpen" x-cloak x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1"
+                class="md:hidden pb-3 relative" x-data="{ open: false }">
+                <form method="get" action="{% url 'store:search' %}">
+                    <input type="text" name="q" placeholder="Search streetwear..." value="{{ q|default:'' }}"
+                        hx-get="{% url 'store:search_suggest' %}" hx-trigger="keyup changed delay:300ms, search"
+                        hx-target="#mobile-search-results-dropdown" hx-swap="innerHTML" @focus="open = true"
+                        @click.away="open = false"
+                        class="w-full bg-surface-card border border-surface-border rounded-xl px-4 py-2.5 text-sm text-customText-white placeholder-customText-gray focus:outline-none focus:border-brand transition">
+                </form>
+                <div id="mobile-search-results-dropdown" x-show="open" x-cloak
+                    class="absolute top-12 left-0 right-0 z-50">
+                </div>
+            </div>
+
+            <!-- Mobile: Full Navigation Menu -->
+            <div x-show="mobileOpen" x-cloak x-transition:enter="transition ease-out duration-250"
+                x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
+                class="md:hidden border-t border-surface-border/50 py-4 space-y-1">
+
+                <!-- Nav Links -->
+                <a href="{% url 'store:home' %}" @click="mobileOpen = false"
+                    class="flex items-center px-3 py-3 rounded-xl text-sm font-medium text-customText-white hover:bg-surface-card hover:text-brand transition">
+                    <svg class="w-4 h-4 mr-3 text-customText-gray" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                        </path>
+                    </svg>
+                    Home
+                </a>
+                {% for cat in nav_categories %}
+                <a href="{% url 'store:category_detail' cat.slug %}" @click="mobileOpen = false"
+                    class="flex items-center px-3 py-3 rounded-xl text-sm font-medium text-customText-white hover:bg-surface-card hover:text-brand transition">
+                    <svg class="w-4 h-4 mr-3 text-customText-gray" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
+                        </path>
+                    </svg>
+                    {{ cat.name }}
+                </a>
+                {% endfor %}
+
+                <!-- Divider -->
+                <div class="border-t border-surface-border/50 my-2"></div>
+
+                <!-- Account Links -->
+                {% if user.is_authenticated %}
+                <a href="{% url 'store:profile' %}" @click="mobileOpen = false"
+                    class="flex items-center px-3 py-3 rounded-xl text-sm font-medium text-customText-white hover:bg-surface-card hover:text-brand transition">
+                    <svg class="w-4 h-4 mr-3 text-customText-gray" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    My Profile
+                </a>
+                <a href="{% url 'store:address_list' %}" @click="mobileOpen = false"
+                    class="flex items-center px-3 py-3 rounded-xl text-sm font-medium text-customText-white hover:bg-surface-card hover:text-brand transition">
+                    <svg class="w-4 h-4 mr-3 text-customText-gray" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    My Addresses
+                </a>
+                <a href="{% url 'store:order_history' %}" @click="mobileOpen = false"
+                    class="flex items-center px-3 py-3 rounded-xl text-sm font-medium text-customText-white hover:bg-surface-card hover:text-brand transition">
+                    <svg class="w-4 h-4 mr-3 text-customText-gray" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                        </path>
+                    </svg>
+                    My Orders
+                </a>
+                <a href="{% url 'store:logout' %}" @click="mobileOpen = false"
+                    class="flex items-center px-3 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                        </path>
+                    </svg>
+                    Log Out
+                </a>
+                {% else %}
+                <a href="{% url 'store:login' %}" @click="mobileOpen = false"
+                    class="flex items-center px-3 py-3 rounded-xl text-sm font-medium text-customText-white hover:bg-surface-card hover:text-brand transition">
+                    <svg class="w-4 h-4 mr-3 text-customText-gray" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
+                        </path>
+                    </svg>
+                    Log In
+                </a>
+                <a href="{% url 'store:signup' %}" @click="mobileOpen = false"
+                    class="mx-3 mt-2 block py-3 px-4 rounded-xl bg-brand text-customText-white font-bold text-sm text-center hover:bg-brand-hover transition">
+                    Create Account
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 {% if request.resolver_match.url_name == 'home' %}pt-0{% else %}pt-6 sm:pt-8{% endif %}">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-slate border-t border-surface-border py-8 text-sm text-customText-gray">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <!-- Col 1: Brand -->
+                <div class="space-y-1">
+                    <a href="{% url 'store:home' %}" class="inline-block">
+                        <img src="{% static 'images/logo_footer.png' %}" alt="Twosomesty Logo" class="h-20 w-auto object-contain mx-auto">
+                    </a>
+                    <p class="leading-relaxed"><span class="text-brand font-heading text-lg tracking-wider uppercase block mb-2 ">OWN YOURLOOK.</span>TWOSOME IS YOUR DESTINATION FOR PREMIUM STREETWEAR OVERSIZED TEES, BAGGY PANTS, JACKETS, AND JERSEYS CURATED FOR THE BOLD. WEAR WHAT SPEAKS FOR YOU.<span class="text-brand font-medium text-5 tracking-wide uppercase block mt-2">STAND OUT - STAY ORIGINAL</span></p>
+                </div>
+                <!-- Col 2: Shop links -->
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-customText-white mt-10">Shop</h4>
+                    <ul class="space-y-1">
+                        <li><a href="#new-arrivals" class="hover:text-brand transition">New Arrivals</a></li>
+                        {% for cat in nav_categories %}
+                        <li><a href="{% url 'store:category_detail' cat.slug %}"
+                            class="text-sm font-medium hover:text-brand transition duration-300 whitespace-nowrap">{{ cat.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- Col 3: Support -->
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-customText-white mt-10">Support</h4>
+                    <ul class="space-y-1">
+                        <li><a href="mailto:twosome.costyle@gmail.com" class="text-sm font-medium hover:text-brand transition duration-300 whitespace-nowrap">twosome.costyle@gmail.com</a></li>
+                        <li><a href="https://wa.me/919043088026?text=Hi%2C%20I%20have%20a%20question%20about%20my%20order" target="_blank" rel="noopener noreferrer" class="text-sm font-medium hover:text-brand transition duration-300 whitespace-nowrap">WhatsApp</a></li>
+                        <li><a href="https://ig.me/m/twosome.sty" target="_blank" rel="noopener noreferrer" class="text-sm font-medium hover:text-brand transition duration-300 whitespace-nowrap">Instagram</a></li>
+                    </ul>
+                    
+                    <div class="pt-8">
+                        <a href="https://www.instagram.com/twosome.sty" target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500 text-white font-bold text-xs hover:opacity-90 hover:scale-105 transform transition duration-300 shadow-md">
+                            <span>Follow us on Instagram</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-surface-border text-center">
+                <p>&copy; {% now "Y" %} <a href="{% url 'store:home' %}" class="font-extrabold">Twosomesty</a>. All rights reserved . Developed by <a href="https://github.com/ulageshwaran" class="font-extrabold ">Ulageshwaran.</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

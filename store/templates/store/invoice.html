@@ -1,0 +1,166 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #{{ order.id }} - Twosomesty</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body {
+                background-color: #ffffff;
+                color: #000000;
+            }
+            .print-hidden {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen py-10 px-4 sm:px-6">
+
+    <!-- Invoice Container -->
+    <div class="max-w-4xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm p-8 md:p-12 relative">
+        
+        <!-- Print Trigger banner (disappears in print mode) -->
+        <div class="print-hidden mb-8 p-4 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="text-sm font-semibold text-slate-700">This is a print-friendly invoice. Use the button to print or download as PDF.</span>
+            </div>
+            <button onclick="window.print()" class="py-2.5 px-5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                </svg>
+                Print Invoice
+            </button>
+        </div>
+
+        <!-- Invoice Header -->
+        <div class="flex flex-col sm:flex-row sm:justify-between items-start gap-6 border-b border-slate-100 pb-10 mb-10">
+            <!-- Brand Info -->
+            <div class="space-y-2 ">
+                <img src="{% static 'images/logo_footer.png' %}" alt="Twosomesty Logo" class="h-16 sm:h-18 w-auto px-8 object-contain">
+                <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold pt-1">Premium Streetwear Brand</p>
+                <p class="text-xs text-slate-700 font-medium">Email: <a href="mailto:twosome.costyle@gmail.com" class="text-blue-600 font-semibold hover:underline">twosome.costyle@gmail.com</a></p>
+            </div>
+
+            <!-- Invoice Details -->
+            <div class="sm:text-right space-y-1">
+                <h2 class="text-xl font-bold text-slate-800">INVOICE</h2>
+                <p class="text-xs text-slate-500">Invoice Number: <strong class="text-slate-800">#INV-{{ order.id|stringformat:"06d" }}</strong></p>
+                <p class="text-xs text-slate-500">Order ID: <strong class="text-slate-800">#{{ order.id }}</strong></p>
+                <p class="text-xs text-slate-500">Date: <strong class="text-slate-800">{{ order.created_at|date:"d M Y, h:i A" }}</strong></p>
+                <p class="text-xs text-slate-500">Payment Status: <strong class="text-emerald-600 font-bold uppercase">{{ order.payment_status }}</strong></p>
+                <p class="text-xs text-slate-500">Payment ID: <strong class="text-slate-800">{{ order.razorpay_payment_id }}</strong></p>
+            </div>
+        </div>
+
+        <!-- Billing details block -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-slate-100 pb-10 mb-10">
+            <!-- Customer info -->
+            <div class="space-y-2">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Billed To</h3>
+                <div class="text-sm">
+                    <p class="font-bold text-slate-800">{{ order.user.first_name|default:order.user.username }}</p>
+                    <p class="text-slate-500">{{ order.user.email }}</p>
+                </div>
+            </div>
+
+            <!-- Shipping address -->
+            <div class="space-y-2">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Shipping Destination</h3>
+                <div class="text-sm">
+                    <p class="text-slate-700 leading-relaxed">
+                        {{ order.address.line1 }}<br>
+                        {{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line items table -->
+        <div class="mb-10">
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200 text-slate-400 text-xs uppercase tracking-wider">
+                        <th class="py-3 font-semibold">Description</th>
+                        <th class="py-3 font-semibold text-center">Unit Price</th>
+                        <th class="py-3 font-semibold text-center">Quantity</th>
+                        <th class="py-3 font-semibold text-right">Amount</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for item in order.items.all %}
+                        <tr class="text-slate-700">
+                            <td class="py-4">
+                                <p class="font-bold text-slate-900">{{ item.variant.product.name }}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Size: {{ item.variant.size|upper }} &bull; Color: {{ item.variant.color }}</p>
+                            </td>
+                            <td class="py-4 text-center">₹{{ item.price_at_purchase }}</td>
+                            <td class="py-4 text-center">{{ item.quantity }}</td>
+                            <td class="py-4 text-right font-bold text-slate-950">₹{{ item.total_price }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary section -->
+        <div class="flex justify-end pt-6 border-t border-slate-100">
+            <div class="w-80 space-y-3 text-sm">
+                <div class="flex justify-between text-slate-500">
+                    <span>Subtotal</span>
+                    <span class="font-semibold text-slate-800">₹{{ order.subtotal }}</span>
+                </div>
+
+                {% if order.coupon_applied %}
+                    <div class="flex justify-between text-emerald-600">
+                        <span>Discount ({{ order.coupon_applied.code }})</span>
+                        <span class="font-semibold">- ₹{{ order.discount_amount }}</span>
+                    </div>
+                {% endif %}
+
+
+
+                <div class="flex justify-between text-slate-500 border-b border-slate-100 pb-3">
+                    <span>Shipping</span>
+                    <span class="font-semibold text-slate-800">
+                        {% if order.shipping_amount == 0 %}
+                            Free
+                        {% else %}
+                            ₹{{ order.shipping_amount }}
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="flex justify-between text-base font-extrabold text-slate-900 pt-1">
+                    <span>Total Amount</span>
+                    <span class="text-lg text-blue-600">₹{{ order.total_amount }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Thank You Notes -->
+        <div class="mt-16 pt-10 border-t border-slate-100 text-center space-y-2">
+            <p class="text-sm font-semibold text-slate-600">Thank you for your purchase!</p>
+            <p class="text-xs text-slate-400">If you have any questions about this invoice, contact support@twosomesty.com</p>
+        </div>
+
+    </div>
+
+    <!-- Automatically open browser print dialog -->
+    <script>
+        window.onload = function() {
+            // Give layout a short moment to load CDNs before launching print window
+            setTimeout(function() {
+                window.print();
+            }, 300);
+        }
+    </script>
+</body>
+</html>

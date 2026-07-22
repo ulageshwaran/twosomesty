@@ -1,0 +1,31 @@
+Hello Store Owner,
+
+A new order has been received and payment is confirmed!
+
+Order Details:
+----------------------------------------
+Order ID: {{ order.id }}
+Date: {{ order.created_at|date:"Y-m-d H:i" }}
+Total Amount: ₹{{ order.total_amount }}
+
+Customer Info:
+----------------------------------------
+Name: {{ order.user.get_full_name|default:order.user.username }}
+Email: {{ order.user.email }}
+Phone: {{ order.user.profile.phone|default:"Not provided" }}
+
+Items Ordered:
+{% for item in order.items.all %}
+- {{ item.variant.product.name }} (Size: {{ item.variant.size|upper }}, Qty: {{ item.quantity }}) - ₹{{ item.total_price }}
+{% endfor %}
+
+Shipping Address:
+----------------------------------------
+{{ order.address.line1 }}
+{% if order.address.line2 %}{{ order.address.line2 }}{% endif %}
+{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}
+
+Please check the admin panel for shipment processing.
+
+Best regards,
+Twosomesty System

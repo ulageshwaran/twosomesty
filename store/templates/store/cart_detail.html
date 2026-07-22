@@ -1,0 +1,158 @@
+{% extends "store/base.html" %}
+
+{% block title %}Shopping Cart | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <!-- Header -->
+    <div class="mb-10">
+        <h1 class="text-4xl font-extrabold text-customText-white font-heading">Your Cart</h1>
+        <p class="text-customText-gray mt-2">Review your items before proceeding to checkout.</p>
+    </div>
+
+    <!-- Layout Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Left Column: Items List -->
+        <div class="lg:col-span-3">
+            <div id="cart-items-container">
+                {% if cart.items.all %}
+                    <div class="space-y-6">
+                        {% for item in cart.items.all %}
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 p-5 sm:p-6 bg-surface-card border border-surface-border rounded-3xl">
+                                <!-- Product Details -->
+                                <div class="flex items-center gap-4 sm:gap-6">
+                                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-surface-slate border border-surface-border rounded-2xl overflow-hidden flex-shrink-0">
+                                        {% if item.variant.product.images.first %}
+                                            <img src="{{ item.variant.product.primary_thumbnail_url }}" alt="{{ item.variant.product.name }}" loading="lazy" decoding="async" class="object-cover w-full h-full">
+                                        {% else %}
+                                            <div class="w-full h-full flex items-center justify-center text-xs text-customText-gray bg-surface-slate">No Image</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <span class="text-xxs sm:text-xs text-brand font-bold uppercase tracking-wider block">
+                                            {{ item.variant.product.brand|default:"Twosomesty" }}
+                                        </span>
+                                        <a href="{% url 'store:product_detail' item.variant.product.slug %}" class="text-base sm:text-lg font-extrabold text-customText-white hover:text-brand transition block leading-snug">
+                                            {{ item.variant.product.name }}
+                                        </a>
+                                        <span class="text-xs sm:text-sm text-customText-gray block">
+                                            Size: <strong class="text-customText-white uppercase">{{ item.variant.size }}</strong> &bull; Color: <strong class="text-customText-white">{{ item.variant.color }}</strong>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Quantity Stepper, Price & Delete Button -->
+                                <div class="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 pt-3 sm:pt-0 border-t sm:border-t-0 border-surface-border/40">
+                                    <!-- Stepper -->
+                                    <div class="flex items-center bg-surface-slate border border-surface-border rounded-xl">
+                                        <button hx-post="{% url 'store:cart_update' item.id %}"
+                                                hx-vals='{"quantity": "{{ item.quantity|add:"-1" }}"}'
+                                                hx-target="#order-summary-card"
+                                                hx-swap="innerHTML"
+                                                class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center font-bold text-customText-gray hover:text-brand transition">-</button>
+                                        <span class="w-8 sm:w-10 text-center font-bold text-customText-white text-xs sm:text-sm">{{ item.quantity }}</span>
+                                        <button hx-post="{% url 'store:cart_update' item.id %}"
+                                                hx-vals='{"quantity": "{{ item.quantity|add:"1" }}"}'
+                                                hx-target="#order-summary-card"
+                                                hx-swap="innerHTML"
+                                                class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center font-bold text-customText-gray hover:text-brand transition"
+                                                {% if item.quantity >= item.variant.stock_qty %}disabled class="opacity-50 cursor-not-allowed"{% endif %}>+</button>
+                                    </div>
+
+                                    <!-- Price Calculations -->
+                                    <div class="text-right min-w-[80px] sm:min-w-[100px]">
+                                        <span class="text-base sm:text-lg font-extrabold text-customText-white block">₹{{ item.total_price }}</span>
+                                        <span class="text-[10px] sm:text-xs text-customText-gray block">₹{{ item.variant.price }} each</span>
+                                    </div>
+
+                                    <!-- Delete Button -->
+                                    <button hx-post="{% url 'store:cart_remove' item.id %}"
+                                            hx-target="#order-summary-card"
+                                            hx-swap="innerHTML"
+                                            class="p-2 text-customText-gray hover:text-red-400 transition flex-shrink-0"
+                                            title="Remove item">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-20 bg-surface-card border border-surface-border rounded-3xl space-y-6">
+                        <div class="w-20 h-20 mx-auto rounded-full bg-surface-slate flex items-center justify-center text-customText-gray">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                            </svg>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-extrabold text-customText-white">Your Shopping Cart is Empty</h3>
+                            <p class="text-sm text-customText-gray max-w-sm mx-auto">Looks like you haven't added anything to your cart yet. Explore our latest arrivals to get started.</p>
+                        </div>
+                        <a href="{% url 'store:home' %}" class="inline-block py-3 px-8 rounded-full bg-brand text-customText-white font-bold text-sm hover:bg-brand-hover hover:scale-105 transform transition">
+                            Explore Catalog
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Column: Order Summary Card -->
+        <div class="lg:col-span-1">
+            <div id="order-summary-card" class="bg-surface-card border border-surface-border rounded-3xl p-8 sticky top-24">
+                <h2 class="text-xl font-extrabold text-customText-white uppercase tracking-wider font-heading mb-6">Order Summary</h2>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-customText-gray">Subtotal</span>
+                        <span class="font-bold text-customText-white">₹{{ cart.subtotal }}</span>
+                    </div>
+
+                    {% if cart.coupon %}
+                        <div class="flex justify-between items-center text-sm text-emerald-400">
+                            <span>Discount ({{ cart.coupon.code }})</span>
+                            <span>- ₹{{ cart.discount_amount }}</span>
+                        </div>
+                    {% endif %}
+
+
+
+                    <div class="flex justify-between items-center text-lg font-extrabold text-customText-white pt-2">
+                        <div class="flex flex-col">
+                            <span>Order Total</span>
+                            <span class="text-sm font-bold text-customText-gray/70 normal-case mt-0.5">(excluding shipping)</span>
+                        </div>
+                        <span class="text-brand">₹{{ cart.total_excluding_shipping }}</span>
+                    </div>
+                </div>
+
+                {% if cart.items.all %}
+                    <div class="mt-8 pt-8 border-t border-surface-border/50">
+                        <h3 class="text-xs font-bold text-customText-white uppercase tracking-wider mb-4">Promo Code</h3>
+                        <form hx-post="{% url 'store:cart_coupon_apply' %}"
+                              hx-target="#order-summary-card"
+                              hx-swap="innerHTML"
+                              class="relative flex items-center">
+                            <input type="text" 
+                                   name="coupon_code" 
+                                   value="{{ cart.coupon.code|default:'' }}"
+                                   placeholder="Enter coupon code" 
+                                   class="w-full bg-surface-slate border border-surface-border rounded-xl pl-4 pr-24 py-3 text-sm text-customText-white focus:outline-none focus:border-brand uppercase placeholder-customText-gray">
+                            <button type="submit" class="absolute right-1.5 py-2 px-4 bg-brand text-customText-white hover:bg-brand-hover rounded-lg text-xs font-bold transition">
+                                Apply
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="mt-8">
+                        <a href="{% url 'store:checkout' %}" class="block w-full py-4 text-center font-bold text-sm bg-brand text-customText-white rounded-xl hover:bg-brand-hover hover:scale-[1.02] transform transition shadow-lg shadow-brand/10">
+                            Proceed to Checkout
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

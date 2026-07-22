@@ -1,0 +1,28 @@
+Dear {{ order.user.username|default:"Customer" }},
+
+Thank you for your order! Your payment has been successfully confirmed.
+
+Order Details:
+----------------------------------------
+Order ID: {{ order.id }}
+Date: {{ order.created_at|date:"Y-m-d H:i" }}
+Total Amount: ₹{{ order.total_amount }}
+
+Items Ordered:
+{% for item in order.items.all %}
+- {{ item.variant.product.name }} (Size: {{ item.variant.size|upper }}, Qty: {{ item.quantity }}) - ₹{{ item.total_price }}
+{% endfor %}
+
+Shipping Address:
+----------------------------------------
+{{ order.address.line1 }}
+{% if order.address.line2 %}{{ order.address.line2 }}{% endif %}
+{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}
+
+Estimated Delivery Note:
+Your items will be dispatched soon. Delivery typically takes 2-4 business days within Tamil Nadu, and 4-7 business days for other states.
+
+If you have any questions, please reply to this email.
+
+Best regards,
+Twosomesty Team

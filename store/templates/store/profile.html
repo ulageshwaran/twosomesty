@@ -1,0 +1,105 @@
+{% extends "store/base.html" %}
+
+{% block title %}My Profile | Twosomesty Streetwear Chennai{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-8 text-sm text-customText-gray">
+        <a href="{% url 'store:home' %}" class="hover:text-brand transition">Home</a>
+        <span class="mx-2">/</span>
+        <span class="text-customText-white">Account</span>
+        <span class="mx-2">/</span>
+        <span class="text-customText-white">Profile</span>
+    </nav>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Sidebar Navigation -->
+        <div class="space-y-4">
+            <div class="bg-surface-card border border-surface-border rounded-2xl p-6">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-xl uppercase">
+                        {{ user.username|slice:":2" }}
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-customText-white">{{ user.first_name }} {{ user.last_name }}</h2>
+                        <p class="text-xs text-customText-gray">{{ user.email }}</p>
+                    </div>
+                </div>
+                
+                <nav class="flex flex-col space-y-1">
+                    <a href="{% url 'store:profile' %}" class="px-4 py-3 rounded-xl bg-brand text-customText-white font-semibold transition">
+                        👤 Profile Details
+                    </a>
+                    <a href="{% url 'store:address_list' %}" class="px-4 py-3 rounded-xl hover:bg-surface-slate text-customText-gray hover:text-customText-white transition">
+                        📍 Saved Addresses
+                    </a>
+                    <a href="{% url 'store:order_history' %}" class="px-4 py-3 rounded-xl hover:bg-surface-slate text-customText-gray hover:text-customText-white transition">
+                        📦 Order History
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Form Area -->
+        <div class="md:col-span-2">
+            <div class="bg-surface-card border border-surface-border rounded-3xl p-8 shadow-2xl">
+                <h3 class="text-2xl font-bold font-heading text-customText-white mb-6">Profile Settings</h3>
+
+                <form method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- First Name -->
+                        <div class="space-y-2">
+                            <label for="id_first_name" class="block text-sm font-semibold text-customText-white">First Name</label>
+                            <input type="text" name="first_name" id="id_first_name" value="{{ user_form.first_name.value|default:'' }}" required
+                                   class="w-full px-4 py-3 rounded-xl bg-surface-slate border border-surface-border text-customText-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition">
+                            {% if user_form.first_name.errors %}
+                                <p class="text-red-400 text-xs mt-1">{{ user_form.first_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="space-y-2">
+                            <label for="id_last_name" class="block text-sm font-semibold text-customText-white">Last Name</label>
+                            <input type="text" name="last_name" id="id_last_name" value="{{ user_form.last_name.value|default:'' }}" required
+                                   class="w-full px-4 py-3 rounded-xl bg-surface-slate border border-surface-border text-customText-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition">
+                            {% if user_form.last_name.errors %}
+                                <p class="text-red-400 text-xs mt-1">{{ user_form.last_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="space-y-2">
+                        <label for="id_email" class="block text-sm font-semibold text-customText-white">Email Address</label>
+                        <input type="email" name="email" id="id_email" value="{{ user_form.email.value|default:'' }}" required
+                               class="w-full px-4 py-3 rounded-xl bg-surface-slate border border-surface-border text-customText-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition">
+                        {% if user_form.email.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ user_form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="space-y-2">
+                        <label for="id_phone" class="block text-sm font-semibold text-customText-white">Phone Number</label>
+                        <input type="text" name="phone" id="id_phone" value="{{ profile_form.phone.value|default:'' }}" placeholder="+91 9876543210"
+                               class="w-full px-4 py-3 rounded-xl bg-surface-slate border border-surface-border text-customText-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition">
+                        {% if profile_form.phone.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ profile_form.phone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+
+                    <div class="pt-4">
+                        <button type="submit" class="px-8 py-3 rounded-xl bg-brand text-customText-white font-bold hover:bg-brand-hover hover:scale-105 transition transform duration-300 shadow-md shadow-brand/20">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

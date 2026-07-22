@@ -1,0 +1,253 @@
+{% extends "store/base.html" %}
+{% load cloudinary_tags %}
+
+{% block title %}Twosomesty | Trendy Streetwear & Fashion in Chennai, Tamil Nadu{% endblock %}
+
+{% block content %}
+<div class="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden mb-12 sm:mb-16 bg-[#121212]" x-data="{ 
+    activeSlide: 0, 
+    slides: [
+        {% if carousel_slides %}
+            {% for slide in carousel_slides %}
+                {
+                    subtitle: '{{ slide.subtitle|escapejs }}',
+                    title: '{{ slide.title|escapejs }}',
+                    description: '{{ slide.description|escapejs }}',
+                    buttonText: '{{ slide.button_text|escapejs }}',
+                    buttonLink: '{{ slide.button_link|escapejs }}',
+                    imageUrl: '{{ slide.image.url|escapejs }}',
+                    gradient: '',
+                    bgClass: 'bg-[#121212]'
+                }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        {% else %}
+            {
+                subtitle: '🚀 STREETWEAR REVOLUTION',
+                title: 'Oversized Fits for the Modern Nomad',
+                description: 'Premium quality heavyweight tees, jackets, hoodies, and jeans designed for extreme comfort. Built in Chennai, crafted for the world.',
+                buttonText: 'Shop Now',
+                buttonLink: '#new-arrivals',
+                imageUrl: '',
+                gradient: '',
+                bgClass: 'bg-gradient-to-br from-[#121212] via-[#2A1B15] to-[#3F4A3C]/30'
+            },
+            {
+                subtitle: '⚡ LIMITED DROPS',
+                title: 'Premium Silhouette Collection',
+                description: 'Exclusive streetwear pieces in limited quantities. Meticulously tailored for structural fits. Once it is gone, it is gone.',
+                buttonText: 'Explore Drops',
+                buttonLink: '#new-arrivals',
+                imageUrl: '',
+                gradient: '',
+                bgClass: 'bg-gradient-to-br from-[#121212] via-[#1C251D] to-[#d20a2e]/30'
+            },
+            {
+                subtitle: '📍 CHENNAI ORIGINS',
+                title: 'Urban Utility Bomber Jackets',
+                description: 'Heavyweight premium canvas utility layers with high-density metal zipper design and insulated inner lining.',
+                buttonText: 'Shop Outerwear',
+                buttonLink: '#new-arrivals',
+                imageUrl: '',
+                gradient: '',
+                bgClass: 'bg-gradient-to-br from-[#121212] via-[#2D2A26] to-[#3F4A3C]/30'
+            }
+        {% endif %}
+    ],
+    timer: null,
+    next() {
+        if (this.slides.length > 1) {
+            this.activeSlide = (this.activeSlide + 1) % this.slides.length;
+        }
+    },
+    init() {
+        if (this.slides.length > 1) {
+            this.timer = setInterval(() => { this.next(); }, 4000);
+        }
+    }
+}" x-init="init()">
+    <!-- Slides Container -->
+    <div class="relative h-[400px] sm:h-[650px] md:h-[650px] overflow-hidden">
+        <template x-for="(slide, index) in slides" :key="index">
+            <div x-show="activeSlide === index" 
+                 x-transition:enter="transition-opacity ease-in-out duration-1000"
+                 x-transition:enter-start="opacity-0" 
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition-opacity ease-in-out duration-1000 absolute inset-0"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="absolute inset-0 w-full h-full flex flex-col justify-center items-center text-center px-6 sm:px-16"
+                 :class="slide.bgClass">
+
+                <!-- Background Image (rendered in 100% full original brightness with 0 blackout) -->
+                <template x-if="slide.imageUrl">
+                    <img :src="slide.imageUrl" :alt="slide.title"
+                        class="absolute inset-0 w-full h-full object-cover object-center z-0">
+                </template>
+
+                <!-- Content -->
+                <div class="relative z-10 max-w-2xl space-y-6 text-center flex flex-col items-center">
+                    <span
+                        class="inline-flex items-center rounded-full bg-surface-bg/15 backdrop-blur-md border border-surface-bg/25 px-3.5 py-1 text-xs font-bold text-surface-bg uppercase tracking-widest shadow"
+                        x-text="slide.subtitle">
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-heading font-extrabold tracking-tight text-surface-bg leading-tight drop-shadow-lg"
+                        x-text="slide.title">
+                    </h1>
+                    <p class="text-sm sm:text-base text-surface-bg leading-relaxed max-w-xl mx-auto drop-shadow-md"
+                        x-text="slide.description">
+                    </p>
+                    <div class="pt-4">
+                        <a :href="slide.buttonLink"
+                            class="inline-flex items-center justify-center px-8 py-4 rounded-xl  text-white font-bold text-sm border-white border-2 hover:scale-105 transition transform ">
+                            <span x-text="slide.buttonText"></span> &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+
+    <!-- Indicators -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 z-20">
+        <template x-for="(slide, index) in slides" :key="index">
+            <button @click="activeSlide = index" class="w-8 h-1.5 rounded-full transition-all duration-300"
+                :class="activeSlide === index ? 'bg-brand' : 'bg-white/20 hover:bg-white/40'"></button>
+        </template>
+    </div>
+</div>
+
+<!-- Category Grid section -->
+<div class="mb-20">
+    <h2 class="text-3xl font-extrabold text-customText-white font-roboto mb-8">BROWSE FASHION</h2>
+    <!-- Swipable carousel on mobile (overflow-x-auto, flex-nowrap) and 5-column grid on desktop (md:grid, md:grid-cols-5) -->
+    <div
+        class="flex md:grid md:grid-cols-5 gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-surface-border">
+        {% for cat in nav_categories %}
+        <a href="{% url 'store:category_detail' cat.slug %}"
+            class="flex-shrink-0 w-[240px] md:w-auto snap-start group block space-y-3">
+            <!-- Category Image Card -->
+            <div
+                class="relative overflow-hidden rounded-3xl border border-surface-border h-72 sm:h-80 group-hover:border-brand transition duration-500">
+                {% if cat.image %}
+                <img src="{{ cat.image|cloudinary_optimize:'w_800,q_90' }}" alt="{{ cat.name }}" loading="lazy" decoding="async"
+                    class="object-cover w-full h-full group-hover:scale-110 transition duration-700">
+                {% else %}
+                <div class="w-full h-full bg-surface-slate flex items-center justify-center text-4xl">📦</div>
+                {% endif %}
+            </div>
+
+            <!-- Category Text & Link Below the Card -->
+            <div class="flex items-center justify-between px-1">
+                <span
+                    class="font-extrabold text-[#121212] text-base group-hover:text-brand transition tracking-wide uppercase font-fredoka">{{ cat.name }}</span>
+                <span
+                    class="text-[#121212] group-hover:text-brand group-hover:translate-x-1 transition transform font-bold text-lg">&rarr;</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Products Grid (New Arrivals) -->
+<div id="new-arrivals" class="mb-20 scroll-mt-24">
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-extrabold text-customText-white font-roboto">NEW DROPS</h2>
+    </div>
+
+    {% if products %}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for product in products %}
+        <div
+            class="group relative flex flex-col justify-between bg-surface-card border border-surface-border rounded-3xl overflow-hidden hover:border-brand/50 transition duration-500">
+            <a href="{% url 'store:product_detail' product.slug %}"
+                class="block relative aspect-square bg-surface-slate overflow-hidden">
+                <!-- If there's an image, render it, else show placeholder -->
+                {% if product.images.first %}
+                <img src="{{ product.images.first.image|cloudinary_optimize:'w_1200,q_90' }}" alt="{{ product.name }}" loading="lazy" decoding="async"
+                    class="object-cover w-full h-full group-hover:scale-105 transition duration-500">
+                {% else %}
+                <div
+                    class="w-full h-full flex items-center justify-center bg-surface-slate text-customText-gray text-xs">
+                    No Image</div>
+                {% endif %}
+
+            </a>
+
+            <div class="p-4 sm:p-6 flex flex-col flex-grow justify-between">
+                <div>
+                    <span class="text-xs text-customText-gray font-medium tracking-wide uppercase">{{ product.category.name }}</span>
+                    <a href="{% url 'store:product_detail' product.slug %}"
+                        class="block mt-1 font-bold text-customText-white hover:text-brand transition text-sm sm:text-base leading-snug">
+                        {{ product.name }}
+                    </a>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between border-t border-surface-border/50 pt-4 gap-2">
+                    {% if product.discount_price %}
+                    <div class="flex flex-wrap items-baseline gap-1.5 min-w-0">
+                        <span class="text-sm sm:text-lg font-extrabold text-brand truncate">₹{{ product.discount_price|floatformat:0 }}</span>
+                        <span class="text-xxs sm:text-sm text-customText-gray line-through truncate">₹{{ product.base_price|floatformat:0 }}</span>
+                    </div>
+                    {% else %}
+                    <span class="text-sm sm:text-lg font-extrabold text-customText-white truncate">₹{{ product.base_price|floatformat:0 }}</span>
+                    {% endif %}
+
+                    <a href="{% url 'store:product_detail' product.slug %}"
+                        class="w-8 h-8 rounded-full bg-surface-slate border border-surface-border flex items-center justify-center text-customText-white hover:bg-brand hover:border-brand flex-shrink-0 transition">
+                        &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-surface-card border border-surface-border rounded-3xl">
+        <p class="text-customText-gray">No products available in database. Run commands to seed data.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Features Section -->
+<div class="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory scrollbar-none">
+    {% if features %}
+        {% for feature in features %}
+            <div class="w-[280px] sm:w-auto flex-shrink-0 snap-center bg-surface-card border border-surface-border rounded-3xl overflow-hidden flex flex-col justify-between hover:border-brand/40 transition duration-500 group">
+                {% if feature.image %}
+                    <div class="w-full aspect-square bg-surface-slate overflow-hidden relative border-b border-surface-border/50">
+                        <img src="{{ feature.image.url }}" alt="{{ feature.title }}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                {% else %}
+                    <div class="w-full h-40 bg-brand/10 flex items-center justify-center text-brand text-4xl border-b border-surface-border/50">✨</div>
+                {% endif %}
+                <div class="p-6 flex flex-col items-center text-center space-y-3 flex-grow">
+                    <h3 class="font-bold text-customText-white text-base sm:text-lg tracking-wider uppercase font-roboto leading-snug">{{ feature.title }}</h3>
+                    <p class="text-customText-gray text-xs sm:text-sm leading-relaxed">{{ feature.description }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="w-[280px] sm:w-auto flex-shrink-0 snap-center bg-surface-card border border-surface-border rounded-3xl overflow-hidden flex flex-col justify-between p-6 items-center text-center space-y-4">
+            <div class="w-20 h-20 rounded-2xl bg-brand/10 flex items-center justify-center text-brand text-3xl">🚚</div>
+            <h3 class="font-bold text-customText-white text-lg tracking-wider uppercase font-roboto">EXPRESS SHIPPING</h3>
+            <p class="text-customText-gray text-sm leading-relaxed">Same-day dispatch across Chennai. Delivery within 1–3 days across Tamil Nadu and India. No long waits! your drip arrives fast!</p>
+        </div>
+        <div class="w-[280px] sm:w-auto flex-shrink-0 snap-center bg-surface-card border border-surface-border rounded-3xl overflow-hidden flex flex-col justify-between p-6 items-center text-center space-y-4">
+            <div class="w-20 h-20 rounded-2xl bg-brand/10 flex items-center justify-center text-brand text-3xl">⚡</div>
+            <h3 class="font-bold text-customText-white text-lg tracking-wider uppercase font-roboto">PREMIUM AND CURATED STREET WEAR</h3>
+            <p class="text-customText-gray text-sm leading-relaxed">Premium silhouettes, and premium-quality Collection.</p>
+        </div>
+        <div class="w-[280px] sm:w-auto flex-shrink-0 snap-center bg-surface-card border border-surface-border rounded-3xl overflow-hidden flex flex-col justify-between p-6 items-center text-center space-y-4">
+            <div class="w-20 h-20 rounded-2xl bg-brand/10 flex items-center justify-center text-brand text-3xl">💳</div>
+            <h3 class="font-bold text-customText-white text-lg tracking-wider uppercase font-roboto">SECURE PAYMENTS</h3>
+            <p class="text-customText-gray text-sm leading-relaxed">100% secure payments with UPI, Netbanking, Cards, and wallets via RAZOR PAY.</p>
+        </div>
+        <div class="w-[280px] sm:w-auto flex-shrink-0 snap-center bg-surface-card border border-surface-border rounded-3xl overflow-hidden flex flex-col justify-between p-6 items-center text-center space-y-4">
+            <div class="w-20 h-20 rounded-2xl bg-brand/10 flex items-center justify-center text-brand text-3xl">🔥</div>
+            <h3 class="font-bold text-customText-white text-lg tracking-wider uppercase font-roboto">LIMITED DROPS</h3>
+            <p class="text-customText-gray text-sm leading-relaxed">Exclusive streetwear pieces in limited quantities. Once it’s gone, it’s gone.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

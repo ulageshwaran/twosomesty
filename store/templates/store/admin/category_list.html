@@ -1,0 +1,137 @@
+{% extends "store/admin/admin_base.html" %}
+
+{% block title %}Category Management | Twosomesty Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900 font-heading tracking-wide">STORE CATEGORIES</h1>
+            <p class="text-xs text-slate-500 mt-1">Organize products into navigation categories and subcategories.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Add / Edit Category Form -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 self-start shadow-sm">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold text-slate-900 font-heading uppercase tracking-wider">
+                    {% if editing_category %}Edit Category #{{ editing_category.id }}{% else %}Add Category{% endif %}
+                </h2>
+                {% if editing_category %}
+                    <a href="{% url 'store:admin_categories' %}" class="text-xs text-slate-500 hover:text-slate-900">Cancel Edit</a>
+                {% endif %}
+            </div>
+
+            <form method="post" action="{% url 'store:admin_categories' %}" enctype="multipart/form-data" class="space-y-4">
+                {% csrf_token %}
+                {% if editing_category %}
+                    <input type="hidden" name="category_id" value="{{ editing_category.id }}">
+                {% endif %}
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Category Name</label>
+                    <input type="text" name="name" value="{{ editing_category.name|default:'' }}" required placeholder="e.g. Oversized Tees"
+                           class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Parent Category (Optional)</label>
+                    <select name="parent"
+                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand text-sm transition">
+                        <option value="">None (Top-Level Category)</option>
+                        {% for cat in categories %}
+                            {% if not editing_category or cat.id != editing_category.id %}
+                                <option value="{{ cat.id }}" {% if editing_category and editing_category.parent and editing_category.parent.id == cat.id %}selected{% endif %}>
+                                    {{ cat.name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Category Image (Optional)</label>
+                    {% if editing_category and editing_category.image %}
+                        <div class="flex items-center gap-3 mb-2 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                            <img src="{{ editing_category.image.url }}" class="w-10 h-10 object-cover rounded-lg">
+                            <span class="text-xs text-slate-500">Current Image</span>
+                        </div>
+                    {% endif %}
+                    <input type="file" name="image" accept="image/*"
+                           class="w-full text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-100 file:text-slate-800 hover:file:bg-slate-200 cursor-pointer">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-lg shadow-brand/20">
+                    {% if editing_category %}Update Category{% else %}Save Category{% endif %}
+                </button>
+            </form>
+        </div>
+
+        <!-- Category Table -->
+        <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl overflow-hidden p-6 space-y-4 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-900 font-heading uppercase tracking-wider">Existing Categories</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-700">
+                    <thead class="text-xs uppercase bg-slate-100 text-slate-500 border-b border-slate-200">
+                        <tr>
+                            <th class="p-3">Category Name</th>
+                            <th class="p-3">Slug</th>
+                            <th class="p-3">Parent</th>
+                            <th class="p-3">Products</th>
+                            <th class="p-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        {% for cat in categories %}
+                            <tr class="hover:bg-slate-50 transition {% if editing_category and editing_category.id == cat.id %}bg-brand/5{% endif %}">
+                                <td class="p-3 font-bold text-slate-900">
+                                    <div class="flex items-center gap-3">
+                                        {% if cat.image %}
+                                            <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="w-8 h-8 rounded-lg object-cover border border-slate-200">
+                                        {% else %}
+                                            <div class="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-xs text-slate-400">📁</div>
+                                        {% endif %}
+                                        <span>{{ cat.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="p-3 text-xs text-slate-500">{{ cat.slug }}</td>
+                                <td class="p-3 text-xs">
+                                    {% if cat.parent %}
+                                        <span class="text-slate-600 font-medium">{{ cat.parent.name }}</span>
+                                    {% else %}
+                                        <span class="text-slate-400">Top Level</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-3 font-extrabold text-slate-900">
+                                    {{ cat.products.count }}
+                                </td>
+                                <td class="p-3 text-right space-x-2">
+                                    <a href="?edit={{ cat.id }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg border border-slate-300 transition inline-block">
+                                        Edit
+                                    </a>
+                                    <form method="post" action="{% url 'store:admin_categories' %}" class="inline-block" onsubmit="return confirm('Are you sure you want to delete category {{ cat.name }}?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="category_id" value="{{ cat.id }}">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="submit" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-lg border border-red-200 transition">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-slate-500">No categories found. Use the form to add one.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

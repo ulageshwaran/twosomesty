@@ -1,0 +1,98 @@
+{% extends "store/base.html" %}
+
+{% block title %}My Orders | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <!-- Header -->
+    <div class="mb-10">
+        <h1 class="text-4xl font-extrabold text-customText-white font-heading">My Orders</h1>
+        <p class="text-customText-gray mt-2">Track status, print invoices, and view order details.</p>
+    </div>
+
+    <!-- Orders Dashboard -->
+    {% if orders %}
+        <div class="space-y-6">
+            {% for order in orders %}
+                <div class="bg-surface-card border border-surface-border rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-brand/50 transition duration-300">
+                    <!-- Order Info -->
+                    <div class="space-y-4 flex-grow">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="text-lg font-extrabold text-customText-white font-heading">
+                                Order #{{ order.id }}
+                            </span>
+                            <span class="text-xs text-customText-gray">
+                                &bull; {{ order.created_at|date:"d M Y, h:i A" }}
+                            </span>
+                            
+                            <!-- Dynamic Status Badges -->
+                            {% if order.status == 'Pending' %}
+                                <span class="px-3 py-1 rounded-full text-xxs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                    {{ order.status }}
+                                </span>
+                            {% elif order.status == 'Paid' or order.status == 'Processing' %}
+                                <span class="px-3 py-1 rounded-full text-xxs font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                    {{ order.status }}
+                                </span>
+                            {% elif order.status == 'Shipped' or order.status == 'Delivered' %}
+                                <span class="px-3 py-1 rounded-full text-xxs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    {{ order.status }}
+                                </span>
+                            {% else %}
+                                <span class="px-3 py-1 rounded-full text-xxs font-bold uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                                    {{ order.status }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Mini Items Preview -->
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            {% for item in order.items.all|slice:":4" %}
+                                <div class="w-10 h-10 bg-surface-slate border border-surface-border rounded-lg overflow-hidden flex-shrink-0" title="{{ item.variant.product.name }}">
+                                    {% if item.variant.product.images.first %}
+                                        <img src="{{ item.variant.product.images.first.image.url }}" alt="{{ item.variant.product.name }}" class="object-cover w-full h-full">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center text-[8px] text-customText-gray bg-surface-slate">No Image</div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            {% if order.items.count > 4 %}
+                                <div class="w-10 h-10 bg-surface-slate border border-surface-border rounded-lg flex items-center justify-center text-xs font-bold text-customText-gray">
+                                    +{{ order.items.count|add:"-4" }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Total & Actions -->
+                    <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 border-surface-border/50 pt-4 md:pt-0 gap-4">
+                        <div class="text-left md:text-right">
+                            <span class="text-xs text-customText-gray block uppercase tracking-wider font-bold">Total Amount</span>
+                            <span class="text-xl font-extrabold text-brand">₹{{ order.total_amount }}</span>
+                        </div>
+                        
+                        <a href="{% url 'store:order_detail' order.id %}" class="py-3 px-6 rounded-xl font-bold text-sm bg-surface-slate border border-surface-border text-customText-white hover:text-brand hover:border-brand transition">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-20 bg-surface-card border border-surface-border rounded-3xl space-y-6">
+            <div class="w-20 h-20 mx-auto rounded-full bg-surface-slate flex items-center justify-center text-customText-gray">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+            </div>
+            <div class="space-y-2">
+                <h3 class="text-xl font-extrabold text-customText-white">No Orders Placed Yet</h3>
+                <p class="text-sm text-customText-gray max-w-sm mx-auto">Browse our latest collections and place your first order with us!</p>
+            </div>
+            <a href="{% url 'store:home' %}" class="inline-block py-3 px-8 rounded-full bg-brand text-customText-white font-bold text-sm hover:bg-brand-hover hover:scale-105 transform transition">
+                Explore Catalog
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

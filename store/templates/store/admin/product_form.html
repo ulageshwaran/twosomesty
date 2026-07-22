@@ -1,0 +1,292 @@
+{% extends "store/admin/admin_base.html" %}
+
+{% block title %}{% if object %}Edit Product #{{ object.id }}{% else %}Add New Product{% endif %} | Twosomesty Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl space-y-6">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900 font-heading tracking-wide">
+                {% if object %}EDIT PRODUCT #{{ object.id }}{% else %}ADD NEW PRODUCT{% endif %}
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">Fill out the details below to update your store catalog, photos, and size variants.</p>
+        </div>
+        <a href="{% url 'store:admin_products' %}" class="text-xs text-slate-500 hover:text-slate-800 transition">
+            &larr; Back to Products
+        </a>
+    </div>
+
+    <!-- Form Container -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-8 shadow-sm">
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Product Title -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Product Name</label>
+                <input type="text" name="name" value="{{ form.name.value|default:'' }}" required placeholder="e.g. Acid Wash Oversized Hoodie"
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">
+            </div>
+
+            <!-- Category & Brand -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Category</label>
+                    <select name="category" required
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-brand text-sm transition">
+                        <option value="">Select Category</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if form.category.value == cat.id or object.category.id == cat.id %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Brand</label>
+                    <input type="text" name="brand" value="{{ form.brand.value|default:'Twosomesty' }}"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">
+                </div>
+            </div>
+
+            <!-- Pricing -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Base Price (₹)</label>
+                    <input type="number" step="0.01" name="base_price" value="{{ form.base_price.value|default:'' }}" required placeholder="1499.00"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Discount Price (₹, optional)</label>
+                    <input type="number" step="0.01" name="discount_price" value="{{ form.discount_price.value|default:'' }}" placeholder="999.00"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Product Description</label>
+                <textarea name="description" rows="4" required placeholder="Detailed product specifications, fit guide, and features..."
+                          class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">{{ form.description.value|default:'' }}</textarea>
+            </div>
+
+            <!-- Image Upload Section -->
+            <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1">
+                        📸 Product Photos (Upload Multiple Images)
+                    </label>
+                    <p class="text-xs text-slate-500 mb-3">Select one or more high quality images (PNG, JPG, WebP) for this product.</p>
+                    
+                    <input type="file" name="images" multiple accept="image/*"
+                           class="w-full text-xs text-slate-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand file:text-white hover:file:bg-brand-hover cursor-pointer">
+                </div>
+
+                <!-- Existing Images Preview (if editing) -->
+                {% if object and object.images.all %}
+                    <div class="border-t border-slate-200 pt-4">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-3">Current Uploaded Photos (Check to Delete)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {% for img in object.images.all %}
+                                <div class="relative group bg-white border border-slate-200 p-2 rounded-xl text-center space-y-2 shadow-xs">
+                                    <img src="{{ img.image.url }}" alt="Product Image" class="w-full h-24 object-cover rounded-lg">
+                                    <div class="flex items-center justify-center gap-1.5 text-xs text-red-600">
+                                        <input type="checkbox" name="delete_images" value="{{ img.id }}" id="del_img_{{ img.id }}" class="accent-brand">
+                                        <label for="del_img_{{ img.id }}" class="cursor-pointer text-[11px] font-semibold">Delete</label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Fabric & Weight Specs -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Fabric Specification</label>
+                    <input type="text" name="fabric" value="{{ form.fabric.value|default:'100% Organic Combed Cotton' }}"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Weight / GSM Specification</label>
+                    <input type="text" name="weight" value="{{ form.weight.value|default:'240 GSM (Oversized Fit)' }}"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">
+                </div>
+            </div>
+
+            <!-- VARIANTS & INVENTORY MANAGEMENT SECTION -->
+            {% if object %}
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-900 font-heading">
+                                📐 Size & Color Variants (Stock Control)
+                            </h3>
+                            <p class="text-xs text-slate-500">Manage stock quantities, sizes, and SKUs for this product.</p>
+                        </div>
+                    </div>
+
+                    <!-- Existing Variants Table -->
+                    {% if variants %}
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-700">
+                                <thead class="uppercase bg-slate-200/60 text-slate-600 border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-2.5">Size</th>
+                                        <th class="p-2.5">Color</th>
+                                        <th class="p-2.5">Stock Quantity</th>
+                                        <th class="p-2.5">SKU</th>
+                                        <th class="p-2.5 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 bg-white">
+                                    {% for variant in variants %}
+                                        <tr>
+                                            <td class="p-2.5">
+                                                <input type="text" name="variant_size_{{ variant.id }}" value="{{ variant.size }}" required
+                                                       class="w-16 px-2 py-1 bg-slate-50 border border-slate-300 rounded text-slate-900 font-bold text-center text-xs">
+                                            </td>
+                                            <td class="p-2.5">
+                                                <input type="text" name="variant_color_{{ variant.id }}" value="{{ variant.color }}" required placeholder="e.g. Black"
+                                                       class="w-28 px-2 py-1 bg-slate-50 border border-slate-300 rounded text-slate-900 font-semibold text-xs">
+                                            </td>
+                                            <td class="p-2.5">
+                                                <input type="number" name="variant_stock_{{ variant.id }}" value="{{ variant.stock_qty }}" min="0" required
+                                                       class="w-20 px-2 py-1 bg-slate-50 border border-slate-300 rounded text-slate-900 font-bold text-center text-xs">
+                                            </td>
+                                            <td class="p-2.5">
+                                                <input type="text" name="variant_sku_{{ variant.id }}" value="{{ variant.sku }}"
+                                                       class="w-32 px-2 py-1 bg-slate-50 border border-slate-300 rounded text-slate-900 font-mono text-xs">
+                                            </td>
+                                            <td class="p-2.5 text-right">
+                                                <button type="submit" name="delete_variant_id" value="{{ variant.id }}"
+                                                        onclick="return confirm('Are you sure you want to delete this variant?')"
+                                                        class="px-2.5 py-1 bg-red-100 border border-red-200 text-red-700 hover:bg-red-200 text-[11px] font-bold rounded cursor-pointer">
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-xs text-amber-700 bg-amber-50 p-3 rounded-xl border border-amber-200 font-medium">
+                            ⚠️ No variants created for this product yet. Add one below so customers can buy this product!
+                        </div>
+                    {% endif %}
+
+                    <!-- Add New Variant Sub-Form -->
+                    <div class="border-t border-slate-200 pt-4 space-y-3">
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-800">+ Add New Size / Color Variant</div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 uppercase mb-1">Size (Custom)</label>
+                                <input type="text" name="new_size" list="size_suggestions" placeholder="e.g. S, M, L, XL, 32"
+                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 text-xs">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] text-slate-500 uppercase mb-1">Color (Custom)</label>
+                                <input type="text" name="new_color" placeholder="e.g. Black / Standard"
+                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 text-xs">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] text-slate-500 uppercase mb-1">Stock Qty</label>
+                                <input type="number" name="new_stock" placeholder="e.g. 25" min="0"
+                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 text-xs">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] text-slate-500 uppercase mb-1">SKU (Optional)</label>
+                                <input type="text" name="new_sku" placeholder="Auto-generated"
+                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 text-xs font-mono">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Manual Initial Variant Settings for New Products -->
+                <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-1">
+                            📐 Add First Size & Color Variant (Optional)
+                        </h3>
+                        <p class="text-xs text-slate-500">Manually upload/enter your first variant details now, or create the product first and add custom variants anytime below.</p>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Size (Custom)</label>
+                            <input type="text" name="new_size" list="size_suggestions" placeholder="e.g. S, M, L, XL, 32"
+                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Color (Custom)</label>
+                            <input type="text" name="new_color" placeholder="e.g. Black / Standard"
+                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Stock Qty</label>
+                            <input type="number" name="new_stock" placeholder="e.g. 10" min="0"
+                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">SKU (Optional)</label>
+                            <input type="text" name="new_sku" placeholder="Auto-generated"
+                                   class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-slate-900 text-xs font-mono">
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <datalist id="size_suggestions">
+                <option value="S">
+                <option value="M">
+                <option value="L">
+                <option value="XL">
+                <option value="XXL">
+                <option value="FREE SIZE">
+                <option value="28">
+                <option value="30">
+                <option value="32">
+                <option value="34">
+            </datalist>
+
+            <!-- Active Checkbox -->
+            <div class="flex items-center gap-3 pt-2">
+                <input type="checkbox" name="is_active" id="id_is_active" {% if form.is_active.value or not object %}checked{% endif %}
+                       class="w-5 h-5 accent-brand rounded border-slate-300">
+                <label for="id_is_active" class="text-sm font-semibold text-slate-900">Active (Visible on storefront)</label>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="pt-4 flex items-center justify-between gap-4 border-t border-slate-200">
+                <div>
+                    {% if object %}
+                    <form method="post" action="{% url 'store:admin_product_delete' object.id %}" onsubmit="return confirm('Are you sure you want to delete product \'{{ object.name }}\'? This action cannot be undone.');">
+                        {% csrf_token %}
+                        <button type="submit" class="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold rounded-xl transition cursor-pointer">
+                            🗑️ Delete Product
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'store:admin_products' %}" class="px-5 py-3 text-xs font-bold text-slate-500 hover:text-slate-900 transition">Cancel</a>
+                    <button type="submit" class="px-6 py-3 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-xl shadow-lg shadow-brand/20 transition cursor-pointer">
+                        Save Product
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

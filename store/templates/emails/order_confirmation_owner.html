@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>New Paid Order Received</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f6f6f6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .header {
+            background-color: #d97706; /* brand warning/owner color accent */
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .content {
+            padding: 30px;
+        }
+        .content p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #555555;
+            margin: 0 0 20px 0;
+        }
+        .details-box {
+            background-color: #f9f9f9;
+            border: 1px border #eeeeee;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .details-label {
+            color: #888888;
+        }
+        .details-value {
+            font-weight: bold;
+            color: #121212;
+        }
+        .item-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+        .item-table th {
+            text-align: left;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eeeeee;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #888888;
+            letter-spacing: 1px;
+        }
+        .item-table td {
+            padding: 15px 0;
+            border-bottom: 1px solid #eeeeee;
+            vertical-align: middle;
+        }
+        .item-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-cover: cover;
+            background-color: #f0f0f0;
+        }
+        .item-info {
+            padding-left: 15px;
+        }
+        .item-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #121212;
+        }
+        .item-meta {
+            font-size: 12px;
+            color: #888888;
+            margin-top: 4px;
+        }
+        .item-price {
+            text-align: right;
+            font-weight: bold;
+            font-size: 14px;
+            color: #121212;
+        }
+        .total-section {
+            text-align: right;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eeeeee;
+        }
+        .total-section span {
+            font-size: 14px;
+            color: #888888;
+        }
+        .total-price {
+            font-size: 22px;
+            font-weight: bold;
+            color: #d97706;
+            margin-left: 10px;
+        }
+        .address-box {
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #555555;
+        }
+        .address-title {
+            font-weight: bold;
+            color: #121212;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 12px;
+        }
+        .footer {
+            background-color: #f6f6f6;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #999999;
+            border-top: 1px solid #eeeeee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Paid Order Received</h1>
+        </div>
+        <div class="content">
+            <p>Hello Store Owner,</p>
+            <p>A new order has been placed and payment is successfully confirmed. Details are provided below:</p>
+            
+            <div class="details-box">
+                <table style="width:100%; border:0;">
+                    <tr>
+                        <td style="color:#888888; font-size:14px; padding:4px 0;">Order ID:</td>
+                        <td style="text-align:right; font-weight:bold; font-size:14px; color:#121212; padding:4px 0;">#{{ order.id }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#888888; font-size:14px; padding:4px 0;">Order Date:</td>
+                        <td style="text-align:right; font-weight:bold; font-size:14px; color:#121212; padding:4px 0;">{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#888888; font-size:14px; padding:4px 0;">Customer Name:</td>
+                        <td style="text-align:right; font-weight:bold; font-size:14px; color:#121212; padding:4px 0;">{{ order.user.get_full_name|default:order.user.username }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#888888; font-size:14px; padding:4px 0;">Customer Email:</td>
+                        <td style="text-align:right; font-weight:bold; font-size:14px; color:#121212; padding:4px 0;">{{ order.user.email }}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#888888; font-size:14px; padding:4px 0;">Customer Phone:</td>
+                        <td style="text-align:right; font-weight:bold; font-size:14px; color:#121212; padding:4px 0;">{{ order.user.profile.phone|default:"Not provided" }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <table class="item-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Items Ordered</th>
+                        <th style="text-align: right;">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td style="width: 60px;">
+                            {% if item.variant.product.images.first %}
+                                <img class="item-img" src="{{ base_url }}{{ item.variant.product.images.first.image.url }}" alt="{{ item.variant.product.name }}">
+                            {% else %}
+                                <div class="item-img" style="display:flex; align-items:center; justify-content:center; font-size:10px; color:#999;">No Image</div>
+                            {% endif %}
+                        </td>
+                        <td class="item-info">
+                            <div class="item-name">{{ item.variant.product.name }}</div>
+                            <div class="item-meta">Size: {{ item.variant.size|upper }} &bull; Qty: {{ item.quantity }}</div>
+                        </td>
+                        <td class="item-price">
+                            ₹{{ item.total_price }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="total-section">
+                <span>Total Revenue:</span>
+                <span class="total-price">₹{{ order.total_amount }}</span>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <div class="address-box">
+                    <div class="address-title">Delivery Address</div>
+                    <div>{{ order.address.line1 }}</div>
+                    {% if order.address.line2 %}<div>{{ order.address.line2 }}</div>{% endif %}
+                    <div>{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}</div>
+                </div>
+            </div>
+
+            <p style="margin-top: 30px; font-size: 13px; color: #888888; text-align: center;">
+                Please log in to the Django Admin panel to process this shipment.
+            </p>
+        </div>
+        <div class="footer">
+            &copy; 2026 Twosomesty. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

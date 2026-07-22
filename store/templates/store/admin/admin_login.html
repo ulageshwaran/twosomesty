@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Twosomesty</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        heading: ['Roboto Condensed', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            DEFAULT: '#d20a2e',
+                            hover: '#b00824',
+                        },
+                        adminBg: '#F9F6F0',
+                        adminCard: '#FFFFFF',
+                        adminBorder: '#E2E8F0',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-adminBg text-slate-800 min-h-screen font-sans flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-xl space-y-6">
+        <!-- Logo & Header -->
+        <div class="text-center space-y-2">
+            <h1 class="text-3xl font-extrabold tracking-wider font-heading text-slate-900">TWOSOMESTY</h1>
+            <div class="inline-block bg-brand/10 border border-brand/20 text-brand text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                ADMIN PORTAL LOGIN
+            </div>
+            <p class="text-xs text-slate-500 pt-2">Enter staff credentials to manage the store.</p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            <div class="space-y-2">
+                {% for message in messages %}
+                    <div class="p-3.5 rounded-xl text-xs font-medium bg-red-50 border border-red-200 text-red-700">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if form.errors %}
+            <div class="p-3.5 rounded-xl text-xs font-medium bg-red-50 border border-red-200 text-red-700">
+                Invalid admin username or password. Please try again.
+            </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="post" action="{% url 'store:admin_login' %}" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Admin Username / Email</label>
+                <input type="text" name="username" required autofocus placeholder="Enter admin username"
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
+                <input type="password" name="password" required placeholder="Enter password"
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">
+            </div>
+
+            <button type="submit" 
+                    class="w-full py-3.5 text-center font-bold text-sm bg-brand text-white rounded-xl hover:bg-brand-hover hover:scale-[1.01] transform transition shadow-lg shadow-brand/20 cursor-pointer mt-2">
+                Sign In to Admin Panel
+            </button>
+        </form>
+
+        <div class="text-center pt-2 border-t border-slate-200">
+            <a href="{% url 'store:home' %}" class="text-xs text-slate-500 hover:text-slate-900 transition">
+                ← Back to Storefront
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

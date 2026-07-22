@@ -1,0 +1,104 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}Complete Payment | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto my-12 bg-surface-card border border-surface-border rounded-3xl p-8 text-center space-y-6 shadow-2xl">
+    <!-- Header Icon & Title -->
+    <div class="flex flex-col items-center justify-center space-y-3 pt-4">
+        <div class="w-16 h-16 rounded-full bg-brand/10 text-brand flex items-center justify-center text-3xl">
+            🔒
+        </div>
+        <h2 class="text-2xl font-bold font-heading text-customText-white">Order #{{ order_id }} Created</h2>
+        <p class="text-customText-gray text-xs">Click the button below to launch the secure Razorpay payment window.</p>
+    </div>
+
+    <!-- Order Summary Box -->
+    <div class="bg-surface-slate/60 border border-surface-border/50 rounded-2xl p-4 text-left space-y-2 text-sm">
+        <div class="flex justify-between items-center">
+            <span class="text-customText-gray">Customer:</span>
+            <span class="font-semibold text-customText-white">{{ customer_name }}</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <span class="text-customText-gray">Email:</span>
+            <span class="font-semibold text-customText-white text-xs">{{ customer_email }}</span>
+        </div>
+        <div class="flex justify-between items-center border-t border-surface-border/40 pt-2 mt-2">
+            <span class="font-bold text-customText-white">Total Amount:</span>
+            <span class="font-extrabold text-brand text-lg">₹{% widthratio amount 100 1 %}</span>
+        </div>
+    </div>
+
+    <!-- Explicit User Action Button (Bypasses Chrome Popup Blockers 100%) -->
+    <button id="rzp-button" class="w-full py-4 text-center font-bold text-base bg-brand text-customText-white rounded-xl hover:bg-brand-hover hover:scale-[1.02] transform transition shadow-lg shadow-brand/20 flex items-center justify-center space-x-2 cursor-pointer">
+        <span>Proceed to Secure Payment</span>
+        <span>&rarr;</span>
+    </button>
+
+    <p class="text-xxs text-customText-gray">Powered by Razorpay 256-bit SSL Encryption</p>
+
+    <!-- Hidden form to post callback fields to verification view -->
+    <form id="razorpay-response-form" method="post" action="{% url 'store:razorpay_callback' %}">
+        {% csrf_token %}
+        <input type="hidden" name="razorpay_order_id" id="rzp-order-id">
+        <input type="hidden" name="razorpay_payment_id" id="rzp-payment-id">
+        <input type="hidden" name="razorpay_signature" id="rzp-signature">
+        <input type="hidden" name="order_id" value="{{ order_id }}">
+    </form>
+</div>
+
+<!-- Razorpay Integration Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    const options = {
+        "key": "{{ razorpay_key_id }}",
+        "amount": Number("{{ amount }}"),
+        "currency": "INR",
+        "name": "Twosomesty",
+        "description": "Order #{{ order_id }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "redirect": true,
+        "callback_url": "{{ callback_url }}",
+        "handler": function (response){
+            // Store payment response
+            document.getElementById('rzp-order-id').value = response.razorpay_order_id;
+            document.getElementById('rzp-payment-id').value = response.razorpay_payment_id;
+            document.getElementById('rzp-signature').value = response.razorpay_signature;
+            // Submit form
+            document.getElementById('razorpay-response-form').submit();
+        },
+        "prefill": {
+            "name": "{{ customer_name }}",
+            "email": "{{ customer_email }}",
+            "contact": "{{ customer_phone }}"
+        },
+        "theme": {
+            "color": "#d20a2e"
+        },
+        "modal": {
+            "backdropclose": false,
+            "escape": true
+        }
+    };
+
+    const rzp = new Razorpay(options);
+
+    rzp.on('payment.failed', function (response){
+        console.error('Razorpay Payment Failed:', response.error);
+        alert('Payment Failed: ' + (response.error.description || 'Transaction could not be completed.'));
+        window.location.href = "{% url 'store:checkout' %}?payment_cancelled=true";
+    });
+
+    // Explicit User Click Handler (Guarantees Chrome allows popups)
+    document.getElementById('rzp-button').onclick = function(e){
+        rzp.open();
+        e.preventDefault();
+    };
+
+    // Automatically trigger on page render if allowed
+    window.addEventListener('DOMContentLoaded', () => {
+        rzp.open();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "store/base.html" %}
+{% load cloudinary_tags %}
+
+{% block title %}My Wishlist | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-10">
+        <h1 class="text-4xl font-extrabold text-customText-white font-heading">My Wishlist</h1>
+        <p class="text-customText-gray mt-2">View and manage the streetwear styles you have saved for later.</p>
+    </div>
+
+    <!-- Wishlist Grid -->
+    {% if wishlist_items %}
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for item in wishlist_items %}
+                {% with product=item.product %}
+                    <div class="bg-surface-card border border-surface-border rounded-3xl overflow-hidden hover:border-brand/40 transition duration-300 group flex flex-col h-full relative">
+                        
+                        <!-- Wishlist Toggle Heart Placement (Top-Right) -->
+                        <div class="absolute top-4 right-4 z-10">
+                            {% include "store/partials/wishlist_button.html" with product=product %}
+                        </div>
+
+                        <!-- Product Image Link -->
+                        <a href="{% url 'store:product_detail' product.slug %}" class="block aspect-h-1 aspect-w-1 relative bg-surface-slate overflow-hidden group-hover:scale-95 transition-transform duration-500 rounded-t-3xl h-72">
+                            {% if product.images.first %}
+                                <img src="{{ product.images.first.image|cloudinary_optimize:'w_500' }}" alt="{{ product.images.first.alt_text|default:product.name }}" loading="lazy" decoding="async" class="object-cover w-full h-full transform group-hover:scale-110 transition duration-700">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-xs text-customText-gray bg-surface-slate">No Image</div>
+                            {% endif %}
+                        </a>
+
+                        <!-- Product Specs -->
+                        <div class="p-4 sm:p-6 flex-grow flex flex-col justify-between">
+                            <div>
+                                <span class="text-xxs font-bold text-brand uppercase tracking-widest block mb-1">
+                                    {{ product.brand|default:"Twosomesty" }}
+                                </span>
+                                <a href="{% url 'store:product_detail' product.slug %}" class="font-bold text-customText-white hover:text-brand transition duration-300 text-sm line-clamp-1 block">
+                                    {{ product.name }}
+                                </a>
+                            </div>
+
+                            <!-- Prices and Action button -->
+                            <div class="mt-4 space-y-3 pt-3 border-t border-surface-border/40">
+                                <div class="flex items-baseline gap-2 flex-wrap">
+                                    {% if product.discount_price %}
+                                        <span class="text-base sm:text-lg font-extrabold text-brand">₹{{ product.discount_price|floatformat:0 }}</span>
+                                        <span class="text-xs text-customText-gray line-through">₹{{ product.base_price|floatformat:0 }}</span>
+                                    {% else %}
+                                        <span class="text-base sm:text-lg font-extrabold text-customText-white">₹{{ product.base_price|floatformat:0 }}</span>
+                                    {% endif %}
+                                </div>
+                                <a href="{% url 'store:product_detail' product.slug %}" class="w-full text-center py-2.5 px-4 rounded-xl font-bold text-xs bg-brand text-customText-white hover:bg-brand-hover hover:scale-[1.02] transform block transition duration-300 shadow">
+                                    View Product
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endwith %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-20 bg-surface-card border border-surface-border rounded-3xl space-y-6">
+            <div class="w-20 h-20 mx-auto rounded-full bg-surface-slate flex items-center justify-center text-customText-gray">
+                <svg class="w-10 h-10 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+            </div>
+            <div class="space-y-2">
+                <h3 class="text-xl font-extrabold text-customText-white">Your Wishlist is Empty</h3>
+                <p class="text-sm text-customText-gray max-w-sm mx-auto">Bookmark the streetwear items you love and they will show up here.</p>
+            </div>
+            <a href="{% url 'store:home' %}" class="inline-block py-3 px-8 rounded-full bg-brand text-customText-white font-bold text-sm hover:bg-brand-hover hover:scale-105 transform transition">
+                Start Exploring
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

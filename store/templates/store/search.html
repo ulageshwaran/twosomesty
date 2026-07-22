@@ -1,0 +1,63 @@
+{% extends "store/base.html" %}
+
+{% block title %}Search results for "{{ q }}" | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6 text-sm text-customText-gray">
+        <a href="{% url 'store:home' %}" class="hover:text-brand transition">Home</a>
+        <span class="mx-2">/</span>
+        <span class="text-customText-white">Search</span>
+    </nav>
+
+    <!-- Header Section with Sorting -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+        <div>
+            <h1 class="text-4xl font-extrabold text-customText-white font-heading">Search Results</h1>
+            <p class="text-customText-gray mt-2 max-w-xl">
+                {% if q %}
+                    Showing results matching <span class="text-brand font-bold">"{{ q }}"</span>.
+                {% else %}
+                    Enter a keyword in the search bar above to browse our catalog.
+                {% endif %}
+            </p>
+        </div>
+        
+        {% if q and products %}
+            <!-- Sorting dropdown (powered by HTMX) -->
+            <div class="flex items-center space-x-3">
+                <label for="sort" class="text-xs font-bold text-customText-gray uppercase tracking-wider whitespace-nowrap leading-none">Sort By:</label>
+                <select name="sort" id="sort" 
+                        hx-get="{% url 'store:search' %}?q={{ q|urlencode }}"
+                        hx-target="#product-grid"
+                        hx-swap="outerHTML"
+                        hx-push-url="true"
+                        hx-trigger="change"
+                        class="bg-surface-card border border-surface-border rounded-xl px-3.5 py-2 text-xs font-semibold text-customText-white focus:outline-none focus:border-brand transition cursor-pointer">
+                    <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest Arrivals</option>
+                    <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                </select>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Product Grid Full Width -->
+    <div class="w-full">
+        {% if q %}
+            <!-- Include our product grid partial -->
+            {% include "store/partials/product_grid.html" %}
+        {% else %}
+            <!-- No search query empty state -->
+            <div class="text-center py-20 bg-surface-card border border-surface-border rounded-3xl space-y-6">
+                <div class="text-4xl text-customText-gray">🔍</div>
+                <div class="space-y-2">
+                    <h3 class="text-lg font-bold text-customText-white">Start Searching</h3>
+                    <p class="text-customText-gray text-sm max-w-xs mx-auto">Use the search input in the navigation header to search our collection.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

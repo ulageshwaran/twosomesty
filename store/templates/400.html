@@ -1,0 +1,32 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}400 Bad Request | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto my-16 px-4 text-center space-y-8">
+    <!-- Big 400 Visual -->
+    <div class="relative flex items-center justify-center">
+        <span class="text-8xl sm:text-9xl font-extrabold font-heading text-brand/20 tracking-widest select-none">400</span>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-4xl sm:text-5xl font-extrabold font-heading text-customText-white tracking-wider">BAD REQUEST</span>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="space-y-2 max-w-md mx-auto">
+        <h1 class="text-xl font-bold text-customText-white font-heading">INVALID REQUEST</h1>
+        <p class="text-customText-gray text-sm leading-relaxed">
+            The server could not understand the request due to invalid syntax or parameters.
+        </p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+        <a href="{% url 'store:home' %}" 
+           class="w-full sm:w-auto px-8 py-3.5 bg-brand hover:bg-brand-hover text-customText-white font-bold text-sm rounded-xl shadow-lg shadow-brand/20 hover:scale-[1.02] transform transition">
+            &larr; Back to Homepage
+        </a>
+    </div>
+</div>
+{% endblock %}

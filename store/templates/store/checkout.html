@@ -1,0 +1,247 @@
+{% extends "store/base.html" %}
+
+{% block title %}Checkout | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto" x-data="{ 
+    showNewAddressForm: {% if not addresses %}true{% else %}false{% endif %},
+    selectedAddressId: '{% for addr in addresses %}{% if addr.is_default %}{{ addr.id }}{% endif %}{% endfor %}' || '{% if addresses %}{{ addresses.0.id }}{% else %}new{% endif %}',
+    newState: '{{ address_form.state.value|default:"Tamil Nadu"|escapejs }}',
+    subtotal: parseFloat('{{ cart.subtotal }}'),
+    discount: parseFloat('{{ cart.discount_amount|default:"0" }}'),
+    jacketsCount: {{ jackets_count|default:0 }},
+    addresses: [
+        {% for addr in addresses %}
+            {
+                id: '{{ addr.id }}',
+                state: '{{ addr.state|escapejs }}'
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    get activeState() {
+        if (this.showNewAddressForm || this.selectedAddressId === 'new') {
+            return this.newState.trim().toLowerCase();
+        }
+        let addr = this.addresses.find(a => String(a.id) === String(this.selectedAddressId));
+        return addr ? addr.state.trim().toLowerCase() : '';
+    },
+    get shippingAmount() {
+        let net = this.subtotal - this.discount;
+        if (net <= 0) {
+            return 0;
+        }
+        let state = this.activeState;
+        let isTN = (state === 'tamil nadu' || state === 'tamilnadu' || state === 'tn');
+        if (this.jacketsCount >= 3) {
+            return isTN ? 100 : 200;
+        }
+        return isTN ? 50 : 100;
+    },
+    get orderTotal() {
+        return Math.max(0, this.subtotal - this.discount + this.shippingAmount);
+    }
+}">
+    <!-- Header -->
+    <div class="mb-10">
+        <h1 class="text-4xl font-extrabold text-customText-white font-heading">Checkout</h1>
+        <p class="text-customText-gray mt-2">Specify your delivery details to complete your order.</p>
+    </div>
+
+    {% if error %}
+        <div class="mb-6 p-4 bg-red-900/30 border border-red-500/50 rounded-2xl text-sm text-red-400 font-medium">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'store:checkout' %}">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Shipping Details -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Address Section -->
+                <div class="bg-surface-card border border-surface-border rounded-3xl p-8 space-y-6">
+                    <h2 class="text-xl font-extrabold text-customText-white uppercase tracking-wider font-heading">Shipping Address</h2>
+                    
+                    {% if addresses %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% for addr in addresses %}
+                                <label class="relative block cursor-pointer border rounded-2xl p-5 hover:border-brand transition bg-surface-slate"
+                                       :class="showNewAddressForm ? 'opacity-50' : ''">
+                                    <input type="radio" 
+                                           name="address_id" 
+                                           value="{{ addr.id }}" 
+                                           class="absolute top-5 right-5 text-brand focus:ring-brand"
+                                           x-model="selectedAddressId"
+                                           @change="showNewAddressForm = false">
+                                    <div class="space-y-1 pr-6">
+                                        <span class="text-xs font-bold text-brand uppercase tracking-wider block">
+                                            {% if addr.is_default %}Default Address{% else %}Shipping Address{% endif %}
+                                        </span>
+                                        <p class="text-sm text-customText-white font-bold leading-relaxed pt-1">
+                                            {{ addr.full_name }}
+                                        </p>
+                                        <p class="text-xs text-customText-white font-semibold leading-relaxed">
+                                            {{ addr.line1 }}
+                                        </p>
+                                        <p class="text-xs text-customText-gray">
+                                            {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}
+                                        </p>
+                                        <p class="text-xxs text-customText-gray/70 pt-0.5">
+                                            {{ addr.phone }}{% if addr.email %} &bull; {{ addr.email }}{% endif %}
+                                        </p>
+                                    </div>
+                                </label>
+                            {% endfor %}
+                        </div>
+
+                        <div class="flex items-center pt-2">
+                            <label class="flex items-center space-x-2 text-sm text-customText-gray hover:text-customText-white cursor-pointer select-none">
+                                <input type="radio" 
+                                       name="address_id" 
+                                       value="new" 
+                                       class="text-brand focus:ring-brand"
+                                       x-model="selectedAddressId"
+                                       @change="showNewAddressForm = true">
+                                <span class="font-bold">Ship to a new address</span>
+                            </label>
+                        </div>
+                    {% else %}
+                        <input type="hidden" name="address_id" value="new">
+                    {% endif %}
+
+                    <!-- New Address Form Details -->
+                    <div x-show="showNewAddressForm" 
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 -translate-y-4"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="border-t border-surface-border/50 pt-6 space-y-4">
+                        <h3 class="text-sm font-bold text-customText-white uppercase tracking-wider">New Shipping Details</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2 md:col-span-2">
+                                <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">Recipient Full Name</label>
+                                <input type="text" name="full_name" value="{{ address_form.full_name.value|default:'' }}" placeholder="e.g. John Doe" :required="showNewAddressForm" class="w-full bg-surface-slate border border-surface-border rounded-xl px-4 py-3 text-sm text-customText-white focus:outline-none focus:border-brand placeholder-customText-gray">
+                                {% if address_form.full_name.errors %}
+                                    <p class="text-xs text-red-400 mt-1 font-medium">{{ address_form.full_name.errors.as_text }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">Recipient Email (optional)</label>
+                                <input type="email" name="email" value="{{ address_form.email.value|default:'' }}" placeholder="e.g. john@example.com" class="w-full bg-surface-slate border border-surface-border rounded-xl px-4 py-3 text-sm text-customText-white focus:outline-none focus:border-brand placeholder-customText-gray">
+                                {% if address_form.email.errors %}
+                                    <p class="text-xs text-red-400 mt-1 font-medium">{{ address_form.email.errors.as_text }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">Recipient Phone</label>
+                                <input type="text" name="phone" value="{{ address_form.phone.value|default:'' }}" placeholder="e.g. 9876543210" :required="showNewAddressForm" class="w-full bg-surface-slate border border-surface-border rounded-xl px-4 py-3 text-sm text-customText-white focus:outline-none focus:border-brand placeholder-customText-gray">
+                                {% if address_form.phone.errors %}
+                                    <p class="text-xs text-red-400 mt-1 font-medium">{{ address_form.phone.errors.as_text }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="space-y-2 md:col-span-2">
+                                <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">Street Address</label>
+                                <input type="text" name="line1" value="{{ address_form.line1.value|default:'' }}" placeholder="e.g. 12, Main Street" class="w-full bg-surface-slate border border-surface-border rounded-xl px-4 py-3 text-sm text-customText-white focus:outline-none focus:border-brand placeholder-customText-gray">
+                                {% if address_form.line1.errors %}
+                                    <p class="text-xs text-red-400 mt-1 font-medium">{{ address_form.line1.errors.as_text }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">City</label>
+                                <input type="text" name="city" value="{{ address_form.city.value|default:'' }}" placeholder="e.g. Chennai" class="w-full bg-surface-slate border border-surface-border rounded-xl px-4 py-3 text-sm text-customText-white focus:outline-none focus:border-brand placeholder-customText-gray">
+                                {% if address_form.city.errors %}
+                                    <p class="text-xs text-red-400 mt-1 font-medium">{{ address_form.city.errors.as_text }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">State</label>
+                                <input type="text" name="state" x-model="newState" placeholder="e.g. Tamil Nadu" class="w-full bg-surface-slate border border-surface-border rounded-xl px-4 py-3 text-sm text-customText-white focus:outline-none focus:border-brand placeholder-customText-gray">
+                                {% if address_form.state.errors %}
+                                    <p class="text-xs text-red-400 mt-1 font-medium">{{ address_form.state.errors.as_text }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">PIN Code</label>
+                                <input type="text" name="pincode" value="{{ address_form.pincode.value|default:'' }}" placeholder="e.g. 600001" class="w-full bg-surface-slate border border-surface-border rounded-xl px-4 py-3 text-sm text-customText-white focus:outline-none focus:border-brand placeholder-customText-gray">
+                                {% if address_form.pincode.errors %}
+                                    <p class="text-xs text-red-400 mt-1 font-medium">{{ address_form.pincode.errors.as_text }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Order Summary & Placement -->
+            <div class="lg:col-span-1">
+                <div class="bg-surface-card border border-surface-border rounded-3xl p-8 sticky top-24 space-y-6">
+                    <h2 class="text-xl font-extrabold text-customText-white uppercase tracking-wider font-heading">Order Summary</h2>
+
+                    <!-- Items Checklist -->
+                    <div class="divide-y divide-surface-border/50 max-h-60 overflow-y-auto scrollbar-thin pr-1">
+                        {% for item in cart.items.all %}
+                            <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+                                <div class="w-12 h-12 bg-surface-slate border border-surface-border rounded-xl overflow-hidden flex-shrink-0">
+                                    {% if item.variant.product.images.first %}
+                                        <img src="{{ item.variant.product.images.first.image.url }}" alt="{{ item.variant.product.name }}" class="object-cover w-full h-full">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center text-[10px] text-customText-gray bg-surface-slate">No Image</div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow min-w-0">
+                                    <h4 class="text-sm font-bold text-customText-white truncate">{{ item.variant.product.name }}</h4>
+                                    <p class="text-xs text-customText-gray">
+                                        Qty: <strong class="text-customText-white">{{ item.quantity }}</strong> &bull; Size: <strong class="text-customText-white uppercase">{{ item.variant.size }}</strong>
+                                    </p>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <span class="text-sm font-bold text-customText-white block">₹{{ item.total_price|floatformat:0 }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Cost Calculations -->
+                    <div class="space-y-4 pt-6 border-t border-surface-border/50">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-customText-gray">Subtotal</span>
+                            <span class="font-bold text-customText-white">₹<span x-text="subtotal"></span></span>
+                        </div>
+
+                        {% if cart.coupon %}
+                            <div class="flex justify-between items-center text-sm text-emerald-400">
+                                <span>Discount ({{ cart.coupon.code }})</span>
+                                <span>- ₹<span x-text="discount"></span></span>
+                            </div>
+                        {% endif %}
+
+                        <div class="flex justify-between items-center text-sm border-b border-surface-border/50 pb-4">
+                            <span class="text-customText-gray">Shipping</span>
+                                <span>₹<span x-text="shippingAmount"></span></span>
+                        </div>
+
+                        <div class="flex justify-between items-center text-lg font-extrabold text-customText-white pt-2">
+                            <span>Order Total</span>
+                            <span class="text-brand">₹<span x-text="orderTotal"></span></span>
+                        </div>
+                    </div>
+
+                    <!-- Place Order Action -->
+                    <div class="pt-4">
+                        <button type="submit" class="w-full py-4 text-center font-bold text-sm bg-brand text-customText-white rounded-xl hover:bg-brand-hover hover:scale-[1.02] transform transition shadow-lg shadow-brand/10 focus:outline-none">
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

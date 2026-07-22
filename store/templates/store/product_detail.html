@@ -1,0 +1,451 @@
+{% extends "store/base.html" %}
+
+{% block title %}{{ product.name }} – Buy Online in Chennai | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto" x-data="productDetail">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-8 text-sm text-customText-gray">
+        <a href="{% url 'store:home' %}" class="hover:text-brand transition">Home</a>
+        <span class="mx-2">/</span>
+        <a href="{% url 'store:category_detail' product.category.slug %}" class="hover:text-brand transition">{{ product.category.name }}</a>
+        <span class="mx-2">/</span>
+        <span class="text-customText-white">{{ product.name }}</span>
+    </nav>
+
+    <!-- Product Layout Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+        
+        <!-- Left Column: Gallery (Alpine-controlled main image) -->
+        <div class="space-y-4" x-data="{ 
+            images: [
+                {% for img in product.images.all %}
+                    '{{ img.get_optimized_url }}',
+                {% endfor %}
+            ],
+            activeIndex: 0,
+            touchStartX: 0,
+            nextImage() {
+                if (this.images.length > 0) {
+                    this.activeIndex = (this.activeIndex + 1) % this.images.length;
+                }
+            },
+            prevImage() {
+                if (this.images.length > 0) {
+                    this.activeIndex = (this.activeIndex - 1 + this.images.length) % this.images.length;
+                }
+            }
+        }">
+            <!-- Main Image Frame with Swipe Support and Navigation Arrows -->
+            <div class="aspect-square bg-surface-card border border-surface-border rounded-3xl overflow-hidden relative group"
+                 @touchstart="touchStartX = $event.touches[0].clientX"
+                 @touchend="if ($event.changedTouches[0].clientX - touchStartX > 50) prevImage(); else if (touchStartX - $event.changedTouches[0].clientX > 50) nextImage();">
+                
+                {% if product.images.first %}
+                    <img :src="images[activeIndex]" alt="{{ product.name }}" decoding="async" class="object-cover w-full h-full transition duration-500 transform hover:scale-105 cursor-zoom-in">
+                    
+                    <!-- Navigation Chevrons -->
+                    <button type="button" @click="prevImage()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-bg/60 border border-surface-border/50 text-customText-white flex items-center justify-center hover:bg-brand hover:border-brand transition duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100 z-10">
+                        &larr;
+                    </button>
+                    <button type="button" @click="nextImage()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-bg/60 border border-surface-border/50 text-customText-white flex items-center justify-center hover:bg-brand hover:border-brand transition duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100 z-10">
+                        &rarr;
+                    </button>
+                    
+                    <!-- Indicator dots -->
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-1.5 z-10">
+                        <template x-for="(img, idx) in images" :key="idx">
+                            <span class="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                                  :class="activeIndex === idx ? 'bg-brand w-4' : 'bg-customText-white/40'"></span>
+                        </template>
+                    </div>
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center bg-surface-slate text-customText-gray">No Image Available</div>
+                {% endif %}
+            </div>
+            
+            <!-- Thumbnails List -->
+            {% if product.images.count > 1 %}
+                <div class="flex gap-2.5 overflow-x-auto py-1 scrollbar-thin">
+                    {% for img in product.images.all %}
+                        <button type="button"
+                                @click="activeIndex = {{ forloop.index0 }}" 
+                                class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-surface-card border border-surface-border rounded-2xl overflow-hidden hover:border-brand focus:outline-none transition-all duration-300"
+                                :class="{ 'border-brand ring-2 ring-brand/20': activeIndex === {{ forloop.index0 }} }">
+                            <img src="{{ img.thumbnail_url }}" alt="Thumbnail" loading="lazy" decoding="async" class="object-cover w-full h-full">
+                        </button>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Product Specs & Actions -->
+        <div class="flex flex-col justify-between">
+            <div class="space-y-6">
+                <!-- Category/Brand & Stars -->
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-brand uppercase tracking-wider">{{ product.brand|default:"Twosomesty" }} Streetwear</span>
+                    <div class="flex items-center space-x-1 text-brand-hover text-sm">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= product.average_rating %}
+                                <span>★</span>
+                            {% else %}
+                                <span class="text-surface-border">★</span>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="text-xs text-customText-gray ml-2">({{ product.reviews_count }} review{{ product.reviews_count|pluralize }})</span>
+                    </div>
+                </div>
+
+                <!-- Title & Price -->
+                <div class="space-y-2">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-customText-white tracking-tight leading-tight">{{ product.name }}</h1>
+                    <div class="flex items-baseline space-x-4">
+                        <span class="text-3xl font-extrabold text-brand">₹<span x-text="currentPrice.toFixed(2)"></span></span>
+                        {% if product.discount_price %}
+                            <span class="text-base text-customText-gray line-through">₹{{ product.base_price }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+
+
+                <!-- Color Selectors -->
+                <div class="space-y-2 border-t border-surface-border/50 pt-6">
+                    <span class="text-xs font-bold text-customText-white uppercase tracking-wider block">Select Color</span>
+                    <div class="flex items-center gap-3">
+                        {% for c in colors %}
+                            <button @click="selectColor('{{ c }}')" 
+                                    class="px-4 py-2.5 rounded-xl border text-xs font-semibold uppercase tracking-wider transition focus:outline-none"
+                                    :class="selectedColor === '{{ c }}' ? 'border-brand text-brand bg-brand/5' : 'border-surface-border text-customText-gray hover:text-customText-white hover:border-surface-border/85 bg-surface-slate'">
+                                {{ c }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Size Selectors -->
+                <div class="space-y-2 border-t border-surface-border/50 pt-6">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-customText-white uppercase tracking-wider">Select Size</span>                    </div>
+                    <div class="flex items-center gap-3">
+                        {% for s in sizes %}
+                            <button @click="selectSize('{{ s }}')" 
+                                    class="w-12 h-12 rounded-xl border text-xs font-bold uppercase transition flex items-center justify-center focus:outline-none"
+                                    :class="selectedSize === '{{ s }}' ? 'border-brand text-brand bg-brand/5' : 'border-surface-border text-customText-gray hover:text-customText-white hover:border-surface-border/85 bg-surface-slate'">
+                                {{ s }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Stock Indicator -->
+                <div class="flex items-center space-x-2 text-xs font-medium border-t border-surface-border/50 pt-6">
+                    <span class="w-2.5 h-2.5 rounded-full" 
+                          :class="!selectedSize || !selectedColor ? 'bg-gray-500' : (isAvailable ? 'bg-emerald-500' : 'bg-red-500')"></span>
+                    <span :class="!selectedSize || !selectedColor ? 'text-customText-gray' : (isAvailable ? 'text-emerald-400' : 'text-red-400')" 
+                          x-text="stockText"></span>
+                </div>
+            </div>
+
+            <!-- CTA Actions (Add to Cart / Quantity) -->
+            <form action="{% url 'store:cart_add' %}"
+                  method="post"
+                  class="mt-8 border-t border-surface-border/50 pt-6 space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="variant_id" :value="activeVariant ? activeVariant.id : ''">
+                
+                <div class="flex items-center justify-between gap-4">
+                    <!-- Quantity Stepper -->
+                    <div class="flex items-center bg-surface-slate border border-surface-border rounded-xl" x-show="isAvailable">
+                        <button type="button" @click="if (quantity > 1) quantity--" class="w-12 h-12 flex items-center justify-center font-bold hover:text-brand transition">-</button>
+                        <input type="hidden" name="quantity" :value="quantity">
+                        <span class="w-10 text-center font-bold text-sm" x-text="quantity"></span>
+                        <button type="button" @click="if (quantity < (activeVariant ? activeVariant.stock : 10)) quantity++" class="w-12 h-12 flex items-center justify-center font-bold hover:text-brand transition">+</button>
+                    </div>
+
+                    <!-- Add to Cart -->
+                    <button type="submit"
+                            class="flex-grow py-4 px-6 rounded-xl font-bold transition flex items-center justify-center space-x-2"
+                            :class="isAvailable ? 'bg-brand text-white hover:bg-brand-hover hover:scale-[1.02] transform' : 'bg-[#EAE4D9] text-[#5C5852] border border-[#A7A29A] cursor-not-allowed'"
+                            :disabled="!isAvailable">
+                        <span x-text="isAvailable ? 'Add to Cart' : (!selectedSize || !selectedColor ? 'Select Size & Color' : 'Out of Stock')"></span>
+                    </button>
+
+                    <!-- Add to Wishlist -->
+                    {% include "store/partials/wishlist_button.html" with product=product %}
+                </div>
+            </form>
+
+            <!-- Product Description & Specs Accordion (Right Side, below Options) -->
+            <div class="mt-8 border-t border-surface-border/50 pt-6 space-y-4 text-left" x-data="{ openSection: 'description' }">
+                <!-- Description Accordion Item -->
+                <div class="border-b border-surface-border/30 pb-4">
+                    <button type="button" 
+                            @click="openSection = (openSection === 'description' ? null : 'description')" 
+                            class="w-full flex items-center justify-between py-2 transition focus:outline-none text-xs font-bold text-customText-white uppercase tracking-wider">
+                        <span>Description</span>
+                        <svg class="w-4 h-4 transform transition-transform duration-300 text-brand" :class="openSection === 'description' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="openSection === 'description'" x-transition x-cloak class="pt-3 text-sm text-customText-gray leading-relaxed space-y-3">
+                        <p>{{ product.description }}</p>
+                    </div>
+                </div>
+
+                <!-- Details Accordion Item -->
+                <div class="border-b border-surface-border/30 pb-4">
+                    <button type="button" 
+                            @click="openSection = (openSection === 'details' ? null : 'details')" 
+                            class="w-full flex items-center justify-between py-2 transition focus:outline-none text-xs font-bold text-customText-white uppercase tracking-wider">
+                        <span>Product Details</span>
+                        <svg class="w-4 h-4 transform transition-transform duration-300 text-brand" :class="openSection === 'details' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="openSection === 'details'" x-transition x-cloak class="pt-3">
+                        <table class="w-full text-xs text-customText-gray">
+                            <tr class="border-b border-surface-border/20 py-2.5 flex justify-between">
+                                <th class="font-bold text-customText-white text-left">Fabric</th>
+                                <td class="text-right">{{ product.fabric }}</td>
+                            </tr>
+                            <tr class="border-b border-surface-border/20 py-2.5 flex justify-between">
+                                <th class="font-bold text-customText-white text-left">Weight</th>
+                                <td class="text-right">{{ product.weight }}</td>
+                            </tr>
+                            <tr class="py-2.5 flex justify-between">
+                                <th class="font-bold text-customText-white text-left">Return Policy</th>
+                                <td class="text-right text-rose-400 font-medium">No Refund or Return, For Replacement Contact Support</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Shipping & Delivery Accordion Item -->
+                <div class="border-b border-surface-border/30 pb-4">
+                    <button type="button" 
+                            @click="openSection = (openSection === 'shipping' ? null : 'shipping')" 
+                            class="w-full flex items-center justify-between py-2 transition focus:outline-none text-xs font-bold text-customText-white uppercase tracking-wider">
+                        <span>Shipping & Delivery</span>
+                        <svg class="w-4 h-4 transform transition-transform duration-300 text-brand" :class="openSection === 'shipping' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="openSection === 'shipping'" x-transition x-cloak class="pt-3 text-xs text-customText-gray space-y-2 leading-relaxed">
+                        <span class="font-bold text-customText-white text-sm mb-4 mx-1">INSTANT SHIPPING WITHIN INDIA</span><br>
+                        <span class="font-bold text-customText-white text-sm mt-4 pt-4 mx-1">ALL OVER INDIA DELIVERY</span>
+                        <div class="flex items-center justify-between py-1 border-b border-surface-border/20">
+                            <span class="font-bold text-customText-white">Within Tamil Nadu:</span>
+                            <span class="text-customText-white font-medium">2 - 3 Days</span>
+                        </div>
+                        <div class="flex items-center justify-between py-1">
+                            <span class="font-bold text-customText-white">Out Of State:</span>
+                            <span class="text-customText-white font-medium">3 - 7 Days</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Reviews Section only at the bottom -->
+    <div class="mb-16 border-t border-surface-border/50 pt-12 space-y-8">
+        <h2 class="text-2xl font-extrabold text-customText-white font-fredoka text-left">Customer Reviews ({{ product.reviews_count }})</h2>
+        
+        <!-- Rating Averages & Write Review Form -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-surface-card border border-surface-border rounded-3xl p-6 md:p-8">
+            <!-- Left: Average rating -->
+            <div class="space-y-4 flex flex-col justify-center text-left">
+                <span class="text-xxs font-bold text-brand uppercase tracking-widest block">Customer Reviews</span>
+                <div class="flex items-baseline space-x-3">
+                    <span class="text-5xl font-black text-customText-white">{{ product.average_rating }}</span>
+                    <span class="text-sm text-customText-gray">out of 5.0</span>
+                </div>
+                <div class="flex items-center space-x-1 text-brand-hover text-lg">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= product.average_rating %}
+                            <span>★</span>
+                        {% else %}
+                            <span class="text-surface-border">★</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <p class="text-xs text-customText-gray leading-relaxed">Based on {{ product.reviews_count }} verified rating{{ product.reviews_count|pluralize }} from Twosomesty customers.</p>
+            </div>
+
+            <!-- Right: Write review -->
+            <div class="border-t md:border-t-0 md:border-l border-surface-border/50 pt-6 md:pt-0 md:pl-8 space-y-4 text-left">
+                {% if user.is_authenticated %}
+                    <h4 class="text-sm font-bold text-customText-white uppercase tracking-wider">Leave a Review</h4>
+                    <form method="post" action="{% url 'store:product_add_review' product.slug %}" class="space-y-4"
+                          x-data="{ rating: 0, hovered: 0 }">
+                        {% csrf_token %}
+                        <input type="hidden" name="rating" :value="rating" required>
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">Your Rating</label>
+                            <div class="flex items-center gap-1">
+                                <template x-for="star in [1,2,3,4,5]" :key="star">
+                                    <button type="button"
+                                            @click="rating = star"
+                                            @mouseenter="hovered = star"
+                                            @mouseleave="hovered = 0"
+                                            class="text-3xl leading-none focus:outline-none transition-transform duration-100 active:scale-110"
+                                            :class="star <= (hovered || rating) ? 'text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,0.7)]' : 'text-surface-border hover:text-yellow-300'"
+                                            :title="star + ' Star' + (star > 1 ? 's' : '')">
+                                        ★
+                                    </button>
+                                </template>
+                                <span class="ml-2 text-xs font-bold transition-all duration-200"
+                                      :class="rating ? 'text-yellow-400' : 'text-customText-gray'"
+                                      x-text="rating === 0 ? 'Select a rating' : ['', '1 — Very Bad', '2 — Poor', '3 — Average', '4 — Good', '5 — Excellent'][rating]">
+                                </span>
+                            </div>
+                            <p x-show="rating === 0" x-cloak class="text-[10px] text-rose-400 font-medium">Please select a star rating before submitting.</p>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">Your Comments</label>
+                            <textarea name="comment" rows="3" placeholder="Share your experience with fit, comfort, and fabric quality..." class="w-full bg-surface-slate border border-surface-border rounded-xl px-4 py-3 text-xs text-customText-white placeholder-customText-gray focus:outline-none focus:border-brand"></textarea>
+                        </div>
+                        <button type="submit" 
+                                :disabled="rating === 0"
+                                :class="rating === 0 ? 'bg-surface-slate text-customText-gray border border-surface-border cursor-not-allowed' : 'bg-brand text-customText-white hover:bg-brand-hover shadow-lg shadow-brand/10'"
+                                class="w-full py-3 rounded-xl font-bold text-xs transition">
+                            <span x-text="rating === 0 ? 'Select a Star to Submit' : 'Submit Review'"></span>
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="flex flex-col items-center justify-center text-center h-full space-y-3 py-4">
+                        <p class="text-xs text-customText-gray">You must be logged in to leave a product review.</p>
+                        <a href="{% url 'store:login' %}?next={{ request.path }}" class="py-2.5 px-6 bg-surface-slate border border-surface-border rounded-full text-xs font-bold text-customText-white hover:text-brand hover:border-brand transition">
+                            Log In to Review
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Reviews List -->
+        <div class="space-y-4">
+            <h3 class="text-sm font-bold text-customText-white uppercase tracking-wider text-left">Reviews Listing</h3>
+            {% if product.reviews.all %}
+                <div class="divide-y divide-surface-border/50">
+                    {% for rev in product.reviews.all %}
+                        <div class="py-6 first:pt-0 last:pb-0 space-y-2 text-left">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h5 class="text-xs font-bold text-customText-white">{{ rev.user.first_name|default:rev.user.username }}</h5>
+                                    <span class="text-[10px] text-customText-gray">{{ rev.created_at|date:"d M Y, h:i A" }}</span>
+                                </div>
+                                <div class="flex text-brand-hover text-xs">
+                                    {% for star in "12345" %}
+                                        {% if forloop.counter <= rev.rating %}
+                                            <span>★</span>
+                                        {% else %}
+                                            <span class="text-surface-border">★</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% if rev.comment %}
+                                <p class="text-xs text-customText-gray leading-relaxed">{{ rev.comment }}</p>
+                            {% else %}
+                                <p class="text-xs text-customText-gray/50 italic">User left a rating without comments.</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-10 bg-surface-card border border-surface-border rounded-3xl text-xs text-customText-gray">
+                    No reviews yet for this product. Fit, style, and print ratings from shoppers will appear here.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+        <div class="border-t border-surface-border/50 pt-12 mb-16">
+            <h2 class="text-2xl font-extrabold text-customText-white font-fredoka mb-8">You May Also Like</h2>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for related in related_products %}
+                    <div class="group relative flex flex-col justify-between bg-surface-card border border-surface-border rounded-3xl overflow-hidden hover:border-brand/50 transition duration-500">
+                        <a href="{% url 'store:product_detail' related.slug %}" class="block relative aspect-square bg-surface-slate overflow-hidden">
+                            {% if related.images.first %}
+                                <img src="{{ related.images.first.image.url }}" alt="{{ related.name }}" class="object-cover w-full h-full group-hover:scale-105 transition duration-500">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center bg-surface-slate text-customText-gray text-xs">No Image</div>
+                            {% endif %}
+                        </a>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-xs text-customText-gray font-medium tracking-wide uppercase">{{ related.category.name }}</span>
+                                <a href="{% url 'store:product_detail' related.slug %}" class="block mt-1 font-bold text-customText-white hover:text-brand transition text-sm leading-snug">
+                                    {{ related.name }}
+                                </a>
+                            </div>
+                            <div class="mt-4 flex items-baseline justify-between border-t border-surface-border/50 pt-4">
+                                <span class="text-base font-extrabold text-customText-white">₹{{ related.base_price }}</span>
+                                <a href="{% url 'store:product_detail' related.slug %}" class="w-8 h-8 rounded-full bg-surface-slate border border-surface-border flex items-center justify-center text-customText-white hover:bg-brand hover:border-brand transition">
+                                    &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('productDetail', () => ({
+            variants: JSON.parse('{{ variants_json|escapejs }}'),
+            selectedSize: '',
+            selectedColor: '',
+            quantity: 1,
+            currentPrice: parseFloat('{{ product.discount_price|default:product.base_price }}'),
+            
+            get activeVariant() {
+                if (!this.selectedSize || !this.selectedColor) return null;
+                return this.variants.find(v => v.size === this.selectedSize && v.color === this.selectedColor) || null;
+            },
+            
+            get isAvailable() {
+                let variant = this.activeVariant;
+                return variant && variant.stock > 0;
+            },
+
+            get stockText() {
+                let variant = this.activeVariant;
+                if (!variant) return 'Select size & color';
+                if (variant.stock <= 0) return 'Out of Stock';
+                if (variant.stock < 5) return `Low Stock: Only ${variant.stock} left!`;
+                return 'In Stock (Express Chennai Delivery)';
+            },
+
+            selectSize(size) {
+                this.selectedSize = size;
+                this.updatePrice();
+            },
+
+            selectColor(color) {
+                this.selectedColor = color;
+                this.updatePrice();
+            },
+
+            updatePrice() {
+                let variant = this.activeVariant;
+                if (variant) {
+                    this.currentPrice = variant.price;
+                } else {
+                    this.currentPrice = parseFloat('{{ product.discount_price|default:product.base_price }}');
+                }
+            }
+        }));
+    });
+</script>
+{% endblock %}

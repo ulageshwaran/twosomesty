@@ -1,0 +1,104 @@
+<!-- Out-of-band Swap for Cart Badge -->
+<span id="cart-badge" hx-swap-oob="true" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xxs font-extrabold leading-none text-customText-white bg-brand rounded-full">
+    {{ cart_count }}
+</span>
+
+<div class="flex flex-col h-full justify-between" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <!-- Items List -->
+    <div class="flex-grow space-y-6 overflow-y-auto">
+        {% if cart.items.all %}
+            {% for item in cart.items.all %}
+                <div class="flex items-center gap-4 bg-surface-slate/50 p-4 border border-surface-border/50 rounded-2xl">
+                    <!-- Product Image -->
+                    <div class="w-16 h-16 bg-surface-card border border-surface-border rounded-xl overflow-hidden flex-shrink-0">
+                        {% if item.variant.product.images.first %}
+                            <img src="{{ item.variant.product.images.first.image.url }}" alt="{{ item.variant.product.name }}" class="object-cover w-full h-full">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-xxs text-customText-gray bg-surface-slate">No Image</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Item Details -->
+                    <div class="flex-grow">
+                        <span class="text-xxs text-brand font-bold uppercase tracking-wider block">
+                            {{ item.variant.product.brand|default:"Twosomesty" }}
+                        </span>
+                        <a href="{% url 'store:product_detail' item.variant.product.slug %}" class="font-bold text-sm text-customText-white hover:text-brand transition block truncate max-w-[150px]">
+                            {{ item.variant.product.name }}
+                        </a>
+                        <span class="text-xs text-customText-gray block mt-0.5">
+                            {{ item.variant.size }} / {{ item.variant.color }}
+                        </span>
+                        <span class="text-xs font-extrabold text-customText-white block mt-1">
+                            ₹{{ item.variant.price }}
+                        </span>
+                    </div>
+
+                    <!-- Quantity Stepper & Delete -->
+                    <div class="flex flex-col items-end justify-between h-16">
+                        <!-- Delete Button -->
+                        <button hx-post="{% url 'store:cart_remove' item.id %}"
+                                hx-target="#cart-drawer-container"
+                                hx-swap="innerHTML"
+                                class="text-customText-gray hover:text-red-400 transition"
+                                title="Remove item">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Quantity Selector -->
+                        <div class="flex items-center bg-surface-card border border-surface-border rounded-lg text-xs">
+                            <button hx-post="{% url 'store:cart_update' item.id %}"
+                                    hx-vals='{"quantity": "{{ item.quantity|add:"-1" }}"}'
+                                    hx-target="#cart-drawer-container"
+                                    hx-swap="innerHTML"
+                                    class="w-6 h-6 flex items-center justify-center font-bold text-customText-gray hover:text-brand transition">-</button>
+                            <span class="w-6 text-center font-bold text-customText-white text-xs">{{ item.quantity }}</span>
+                            <button hx-post="{% url 'store:cart_update' item.id %}"
+                                    hx-vals='{"quantity": "{{ item.quantity|add:"1" }}"}'
+                                    hx-target="#cart-drawer-container"
+                                    hx-swap="innerHTML"
+                                    class="w-6 h-6 flex items-center justify-center font-bold text-customText-gray hover:text-brand transition"
+                                    {% if item.quantity >= item.variant.stock_qty %}disabled class="opacity-50 cursor-not-allowed"{% endif %}>+</button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="flex flex-col items-center justify-center py-20 text-center space-y-4">
+                <div class="w-16 h-16 rounded-full bg-surface-slate flex items-center justify-center text-customText-gray">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="font-bold text-customText-white">Your Cart is Empty</h3>
+                    <p class="text-xs text-customText-gray">Browse our streetwear catalog to add items.</p>
+                </div>
+                <button @click="cartOpen = false" class="py-2.5 px-6 rounded-xl bg-brand text-customText-white font-bold text-xs hover:bg-brand-hover transition">
+                    Continue Shopping
+                </button>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Drawer Footer Summary -->
+    {% if cart.items.all %}
+        <div class="border-t border-surface-border pt-6 mt-6 space-y-4">
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-customText-gray font-medium">Subtotal</span>
+                <span class="font-extrabold text-customText-white">₹{{ cart.subtotal }}</span>
+            </div>
+            <p class="text-xxs text-customText-gray">Taxes, coupon discounts, and shipping calculated at checkout.</p>
+            <div class="grid grid-cols-2 gap-4">
+                <a href="{% url 'store:cart_detail' %}" class="py-3.5 text-center font-bold text-xs border border-surface-border text-customText-white rounded-xl hover:bg-surface-slate transition">
+                    View Cart
+                </a>
+                <a href="{% url 'store:cart_detail' %}" class="py-3.5 text-center font-bold text-xs bg-brand text-customText-white rounded-xl hover:bg-brand-hover hover:scale-[1.02] transform transition">
+                    Checkout
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>

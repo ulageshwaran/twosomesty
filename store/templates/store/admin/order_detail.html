@@ -1,0 +1,212 @@
+{% extends "store/admin/admin_base.html" %}
+
+{% block title %}Order #{{ order.id }} Details | Twosomesty Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-3xl font-extrabold text-slate-900 font-heading tracking-wide">ORDER #{{ order.id }}</h1>
+                {% if order.payment_status == 'Paid' %}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">PAID</span>
+                {% else %}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200">{{ order.payment_status|upper }}</span>
+                {% endif %}
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Placed on {{ order.created_at|date:"d F Y, H:i A" }}</p>
+        </div>
+        <a href="{% url 'store:admin_orders' %}" class="text-xs text-slate-500 hover:text-slate-900 transition self-start sm:self-auto">
+            &larr; Back to All Orders
+        </a>
+    </div>
+
+    <!-- Status Change & Shipment Tracking Card -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
+        <form method="post" action="{% url 'store:admin_order_status_update' order.id %}" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                <div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Current Fulfillment Status</div>
+                    <div class="text-lg font-extrabold text-slate-900 mt-0.5">{{ order.get_status_display }}</div>
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <select name="status" class="bg-slate-50 border border-slate-300 text-sm text-slate-800 rounded-xl px-4 py-2.5 font-semibold focus:outline-none focus:border-brand flex-1 sm:flex-initial">
+                        {% for code, label in order.STATUS_CHOICES %}
+                            <option value="{{ code }}" {% if order.status == code %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="px-5 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-xs">
+                        Update Status
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shipment Partner & Tracking ID Inputs -->
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center gap-2">
+                    <span>🚚</span> Shipment & Logistics Tracking Info
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Shipment Partner / Courier</label>
+                        {% with current_sp=order.shipping_partner|default:'' %}
+                        <select name="shipping_partner"
+                                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-semibold focus:outline-none focus:border-brand">
+                            <option value="">-- Select Delivery Partner --</option>
+                            <option value="Delhivery" {% if current_sp == 'Delhivery' %}selected{% endif %}>Delhivery</option>
+                            <option value="BlueDart" {% if current_sp == 'BlueDart' %}selected{% endif %}>BlueDart</option>
+                            <option value="ST Courier" {% if current_sp == 'ST Courier' %}selected{% endif %}>ST Courier</option>
+                            <option value="Franch Express" {% if current_sp == 'Franch Express' %}selected{% endif %}>Franch Express</option>
+                            <option value="India Post" {% if current_sp == 'India Post' %}selected{% endif %}>India Post (Speed Post)</option>
+                            <option value="DTDC" {% if current_sp == 'DTDC' %}selected{% endif %}>DTDC</option>
+                            <option value="Ekart" {% if current_sp == 'Ekart' %}selected{% endif %}>Ekart Logistics</option>
+                            <option value="Shadowfax" {% if current_sp == 'Shadowfax' %}selected{% endif %}>Shadowfax</option>
+                            <option value="XpressBees" {% if current_sp == 'XpressBees' %}selected{% endif %}>XpressBees</option>
+                            <option value="Professional Couriers" {% if current_sp == 'Professional Couriers' %}selected{% endif %}>Professional Couriers</option>
+                            <option value="FedEx" {% if current_sp == 'FedEx' %}selected{% endif %}>FedEx</option>
+                            <option value="DHL Express" {% if current_sp == 'DHL Express' %}selected{% endif %}>DHL Express</option>
+                            <option value="Other" {% if current_sp == 'Other' %}selected{% endif %}>Other Courier</option>
+                            {% if current_sp and current_sp not in 'Delhivery BlueDart ST Courier Franch Express India Post DTDC Ekart Shadowfax XpressBees Professional Couriers FedEx DHL Express Other' %}
+                                <option value="{{ current_sp }}" selected>{{ current_sp }}</option>
+                            {% endif %}
+                        </select>
+                        {% endwith %}
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Shipment Tracking ID / AWB No.</label>
+                        <input type="text" name="tracking_number" value="{{ order.tracking_number|default:'' }}" placeholder="e.g. TRACK987654321"
+                               class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-mono font-semibold focus:outline-none focus:border-brand">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Customer & Shipping Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Customer Info -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-3 shadow-sm">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 font-heading">Customer Information</h3>
+            <div class="text-sm space-y-1">
+                <div class="font-bold text-slate-900">{{ order.user.get_full_name|default:order.user.username }}</div>
+                <div class="text-slate-600">Username: {{ order.user.username }}</div>
+                <div class="text-slate-600">Email: {{ order.user.email }}</div>
+                {% if order.address and order.address.phone %}
+                    <div class="text-slate-600">Phone: {{ order.address.phone }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-3 shadow-sm">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 font-heading">Shipping Address</h3>
+            {% if order.address %}
+                <div class="text-sm text-slate-700 space-y-1">
+                    <div class="font-bold text-slate-900">{{ order.address.line1 }}</div>
+                    {% if order.address.line2 %}<div>{{ order.address.line2 }}</div>{% endif %}
+                    <div>{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}</div>
+                </div>
+            {% else %}
+                <div class="text-sm text-slate-400">No address saved for this order.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Payment Transaction Info -->
+    {% if order.razorpay_payment_id or order.razorpay_order_id %}
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-3 shadow-sm">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 font-heading">Razorpay Gateway Tracking</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+                {% if order.razorpay_order_id %}
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                        <span class="text-slate-500 block">Razorpay Order ID</span>
+                        <span class="text-slate-900 font-bold">{{ order.razorpay_order_id }}</span>
+                    </div>
+                {% endif %}
+                {% if order.razorpay_payment_id %}
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                        <span class="text-slate-500 block">Razorpay Payment ID</span>
+                        <span class="text-slate-900 font-bold">{{ order.razorpay_payment_id }}</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Ordered Items Table -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 font-heading">Purchased Items</h3>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-700">
+                <thead class="text-xs uppercase bg-slate-100 text-slate-500 border-b border-slate-200">
+                    <tr>
+                        <th class="p-3">Item</th>
+                        <th class="p-3">Variant Specs</th>
+                        <th class="p-3">Unit Price</th>
+                        <th class="p-3">Qty</th>
+                        <th class="p-3 text-right">Line Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    {% for item in order.items.all %}
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3">
+                                <div class="flex items-center gap-3">
+                                    {% if item.variant and item.variant.product.images.first %}
+                                        <img src="{{ item.variant.product.images.first.image.url }}" alt="{{ item.variant.product.name }}" class="w-12 h-12 rounded-xl object-cover border border-slate-200">
+                                    {% else %}
+                                        <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-xs text-slate-400">No Img</div>
+                                    {% endif %}
+                                    <div class="font-bold text-slate-900">{{ item.variant.product.name|default:"Deleted Product" }}</div>
+                                </div>
+                            </td>
+                            <td class="p-3 text-xs text-slate-500">
+                                {% if item.variant %}
+                                    <div>Size: {{ item.variant.size }} | Color: {{ item.variant.color }}</div>
+                                    <div class="text-slate-400">SKU: {{ item.variant.sku }}</div>
+                                {% else %}
+                                    <span>-</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-3 font-semibold text-slate-900">₹{{ item.price_at_purchase }}</td>
+                            <td class="p-3 font-bold text-slate-900">{{ item.quantity }}</td>
+                            <td class="p-3 text-right font-extrabold text-slate-900">₹{{ item.total_price }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals Summary -->
+        <div class="border-t border-slate-200 pt-4 max-w-xs ml-auto space-y-2 text-sm">
+            <div class="flex justify-between text-slate-500">
+                <span>Subtotal:</span>
+                <span class="font-semibold text-slate-900">₹{{ order.subtotal }}</span>
+            </div>
+            {% if order.discount_amount > 0 %}
+                <div class="flex justify-between text-emerald-600 font-semibold">
+                    <span>Discount:</span>
+                    <span>- ₹{{ order.discount_amount }}</span>
+                </div>
+            {% endif %}
+            <div class="flex justify-between text-slate-500">
+                <span>Shipping Fee:</span>
+                <span class="font-semibold text-slate-900">₹{{ order.shipping_amount }}</span>
+            </div>
+            <div class="flex justify-between text-base font-extrabold text-slate-900 border-t border-slate-200 pt-2 mt-2">
+                <span>Total Amount:</span>
+                <span class="text-brand">₹{{ order.total_amount }}</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

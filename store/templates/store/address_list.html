@@ -1,0 +1,103 @@
+{% extends "store/base.html" %}
+
+{% block title %}My Addresses | Twosomesty Streetwear Chennai{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-8 text-sm text-customText-gray">
+        <a href="{% url 'store:home' %}" class="hover:text-brand transition">Home</a>
+        <span class="mx-2">/</span>
+        <span class="text-customText-white">Account</span>
+        <span class="mx-2">/</span>
+        <span class="text-customText-white">Addresses</span>
+    </nav>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Sidebar Navigation -->
+        <div class="space-y-4">
+            <div class="bg-surface-card border border-surface-border rounded-2xl p-6">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-xl uppercase">
+                        {{ user.username|slice:":2" }}
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-customText-white">{{ user.first_name }} {{ user.last_name }}</h2>
+                        <p class="text-xs text-customText-gray">{{ user.email }}</p>
+                    </div>
+                </div>
+                
+                <nav class="flex flex-col space-y-1">
+                    <a href="{% url 'store:profile' %}" class="px-4 py-3 rounded-xl hover:bg-surface-slate text-customText-gray hover:text-customText-white transition">
+                        👤 Profile Details
+                    </a>
+                    <a href="{% url 'store:address_list' %}" class="px-4 py-3 rounded-xl bg-brand text-customText-white font-semibold transition">
+                        📍 Saved Addresses
+                    </a>
+                    <a href="{% url 'store:order_history' %}" class="px-4 py-3 rounded-xl hover:bg-surface-slate text-customText-gray hover:text-customText-white transition">
+                        📦 Order History
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-surface-card border border-surface-border rounded-3xl p-8 shadow-2xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold font-heading text-customText-white">Saved Addresses</h3>
+                    <a href="{% url 'store:address_add' %}" class="px-4 py-2 rounded-full bg-brand text-customText-white text-xs font-bold hover:bg-brand-hover hover:scale-105 transition transform duration-300">
+                        + Add Address
+                    </a>
+                </div>
+
+                {% if addresses %}
+                    <div class="grid grid-cols-1 gap-4">
+                        {% for address in addresses %}
+                            <div class="border {% if address.is_default %}border-brand bg-brand/5{% else %}border-surface-border bg-surface-slate{% endif %} rounded-2xl p-6 relative flex flex-col justify-between">
+                                <div>
+                                    <div class="flex flex-col mb-2">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-customText-white">{{ address.full_name }}</span>
+                                            {% if address.is_default %}
+                                                <span class="bg-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border border-brand/30">
+                                                    Default
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-xs text-customText-gray/80 mt-1">
+                                            {{ address.phone }}{% if address.email %} &bull; {{ address.email }}{% endif %}
+                                        </div>
+                                    </div>
+                                    <p class="text-customText-gray leading-relaxed mt-2">{{ address.line1 }}</p>
+                                    {% if address.line2 %}
+                                        <p class="text-customText-gray leading-relaxed">{{ address.line2 }}</p>
+                                    {% endif %}
+                                    <p class="text-customText-gray leading-relaxed mt-1 font-medium">{{ address.city }}, {{ address.state }} - {{ address.pincode }}</p>
+                                </div>
+
+                                <div class="flex items-center space-x-4 mt-6 pt-4 border-t border-surface-border/50 text-xs">
+                                    <a href="{% url 'store:address_edit' address.id %}" class="font-semibold hover:text-brand transition">Edit Address</a>
+                                    <a href="{% url 'store:address_delete' address.id %}" class="font-semibold text-red-400 hover:text-red-300 transition">Delete</a>
+                                    {% if not address.is_default %}
+                                        <a href="{% url 'store:address_set_default' address.id %}" class="font-semibold text-brand-hover hover:underline transition">Set as Default</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12 space-y-4">
+                        <div class="text-4xl">📍</div>
+                        <h4 class="text-lg font-bold text-customText-white">No Saved Addresses</h4>
+                        <p class="text-customText-gray text-sm max-w-sm mx-auto">Please add a shipping address to facilitate speedier checkouts.</p>
+                        <a href="{% url 'store:address_add' %}" class="inline-block px-6 py-3 rounded-full bg-brand text-customText-white text-sm font-bold hover:bg-brand-hover transition">
+                            Create First Address
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

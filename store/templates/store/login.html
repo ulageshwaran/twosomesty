@@ -1,0 +1,57 @@
+{% extends "store/base.html" %}
+
+{% block title %}Log In | Twosomesty Streetwear Chennai{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto my-12">
+    <div class="bg-surface-card border border-surface-border rounded-3xl p-8 shadow-2xl relative">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-extrabold font-heading text-customText-white">Welcome Back</h2>
+            <p class="text-customText-gray mt-2">Log in to manage your orders & addresses</p>
+        </div>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="bg-red-500/10 border border-red-500 text-red-400 p-4 rounded-xl text-sm">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="space-y-2">
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-customText-white">
+                        {{ field.label }}
+                    </label>
+                    <input type="{% if 'password' in field.name %}password{% else %}text{% endif %}"
+                           name="{{ field.name }}"
+                           id="{{ field.id_for_label }}"
+                           value="{{ field.value|default_if_none:'' }}"
+                           required
+                           class="w-full px-4 py-3 rounded-xl bg-surface-slate border border-surface-border text-customText-white placeholder-customText-gray focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-300">
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div>
+                <button type="submit" class="w-full py-4 px-6 rounded-xl bg-brand text-customText-white font-bold hover:bg-brand-hover hover:scale-[1.02] transform transition duration-300 shadow-lg shadow-brand/20">
+                    Sign In
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-surface-border text-center text-sm text-customText-gray">
+            <p>Don't have an account? 
+                <a href="{% url 'store:signup' %}" class="text-brand hover:underline font-semibold transition">Sign Up Here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

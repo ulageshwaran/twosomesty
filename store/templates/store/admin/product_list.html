@@ -1,0 +1,96 @@
+{% extends "store/admin/admin_base.html" %}
+
+{% block title %}Products & Stock | Twosomesty Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header & Action -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold text-slate-900 font-heading tracking-wide">PRODUCTS & INVENTORY</h1>
+            <p class="text-xs text-slate-500 mt-1">Manage catalog items, pricing, sizes, colors, and stock levels.</p>
+        </div>
+        <a href="{% url 'store:admin_product_add' %}" class="px-4 py-2.5 bg-brand hover:bg-brand-hover text-white text-xs font-bold rounded-xl shadow-lg shadow-brand/20 transition inline-flex items-center gap-2 self-start sm:self-auto">
+            <span>+ Add New Product</span>
+        </a>
+    </div>
+
+    <!-- Product Grid Table -->
+    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden p-6 space-y-4 shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-700">
+                <thead class="text-xs uppercase bg-slate-100 text-slate-500 border-b border-slate-200">
+                    <tr>
+                        <th class="p-3">Product</th>
+                        <th class="p-3">Category</th>
+                        <th class="p-3">Base Price</th>
+                        <th class="p-3">Discount Price</th>
+                        <th class="p-3">Total Variants</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    {% for product in products %}
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3">
+                                <div class="flex items-center gap-3">
+                                    {% if product.images.first %}
+                                        <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="w-12 h-12 rounded-xl object-cover border border-slate-200">
+                                    {% else %}
+                                        <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-xs text-slate-400">No Img</div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="font-bold text-slate-900">{{ product.name }}</div>
+                                        <div class="text-xs text-slate-500">Slug: {{ product.slug }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <span class="px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-medium text-slate-700">
+                                    {{ product.category.name|default:"Uncategorized" }}
+                                </span>
+                            </td>
+                            <td class="p-3 font-semibold text-slate-900">₹{{ product.base_price }}</td>
+                            <td class="p-3">
+                                {% if product.discount_price %}
+                                    <span class="font-extrabold text-brand">₹{{ product.discount_price }}</span>
+                                {% else %}
+                                    <span class="text-slate-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-3 font-semibold text-slate-900">
+                                {{ product.variants.count }} variants
+                            </td>
+                            <td class="p-3">
+                                {% if product.is_active %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">Active</span>
+                                {% else %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">Draft</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-3 text-right space-x-2 whitespace-nowrap">
+                                <a href="{% url 'store:admin_product_edit' product.id %}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg border border-slate-300 transition inline-block">
+                                    Edit
+                                </a>
+                                <form method="post" action="{% url 'store:admin_product_delete' product.id %}" class="inline-block" onsubmit="return confirm('Are you sure you want to delete product \'{{ product.name }}\'? This action cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold rounded-lg transition cursor-pointer">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="p-8 text-center text-slate-500">No products found. Click "+ Add New Product" to start building your catalog.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

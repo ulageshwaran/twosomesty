@@ -1,0 +1,51 @@
+{% extends "store/base.html" %}
+
+{% block title %}Order Confirmed | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto text-center py-16 px-4">
+    <!-- Success Badge Icon -->
+    <div class="w-24 h-24 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
+        <svg class="w-12 h-12 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+        </svg>
+    </div>
+
+    <!-- Success Copy -->
+    <div class="space-y-4 mb-10">
+        <span class="text-xs font-bold text-brand uppercase tracking-widest block">Payment Confirmed</span>
+        <h1 class="text-4xl font-extrabold text-customText-white font-heading">Order Placed Successfully!</h1>
+        <p class="text-lg text-customText-gray leading-relaxed max-w-md mx-auto">
+            Thank you for shopping with Twosomesty. Your order <strong class="text-customText-white">#{{ order.id }}</strong> has been registered and is currently being processed.
+        </p>
+    </div>
+
+    <!-- Info Details Card -->
+    <div class="bg-surface-card border border-surface-border rounded-3xl p-6 mb-10 text-left space-y-3">
+        <div class="flex justify-between items-center text-sm">
+            <span class="text-customText-gray">Order Date</span>
+            <span class="font-bold text-customText-white">{{ order.created_at|date:"d M Y, h:i A" }}</span>
+        </div>
+        <div class="flex justify-between items-center text-sm border-t border-surface-border/30 pt-3">
+            <span class="text-customText-gray">Total Paid</span>
+            <span class="font-extrabold text-brand text-base">₹{{ order.total_amount }}</span>
+        </div>
+        <div class="flex justify-between items-start text-sm border-t border-surface-border/30 pt-3">
+            <span class="text-customText-gray">Shipping Address</span>
+            <span class="font-bold text-customText-white text-right max-w-xs leading-relaxed">
+                {{ order.address.line1 }}, {{ order.address.city }} - {{ order.address.pincode }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="{% url 'store:order_history' %}" class="w-full sm:w-auto py-4 px-8 font-bold text-sm bg-brand text-customText-white rounded-xl hover:bg-brand-hover hover:scale-105 transform transition shadow-lg shadow-brand/10">
+            View Order History
+        </a>
+        <a href="{% url 'store:home' %}" class="w-full sm:w-auto py-4 px-8 font-bold text-sm bg-surface-card border border-surface-border text-customText-white rounded-xl hover:bg-surface-slate hover:text-brand transition">
+            Continue Shopping
+        </a>
+    </div>
+</div>
+{% endblock %}

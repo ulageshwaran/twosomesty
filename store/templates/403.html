@@ -1,0 +1,32 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}403 Access Denied | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto my-16 px-4 text-center space-y-8">
+    <!-- Big 403 Visual -->
+    <div class="relative flex items-center justify-center">
+        <span class="text-8xl sm:text-9xl font-extrabold font-heading text-amber-500/20 tracking-widest select-none">403</span>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-4xl sm:text-5xl font-extrabold font-heading text-customText-white tracking-wider">ACCESS DENIED</span>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="space-y-2 max-w-md mx-auto">
+        <h1 class="text-xl font-bold text-customText-white font-heading">RESTRICTED AREA</h1>
+        <p class="text-customText-gray text-sm leading-relaxed">
+            You do not have administrative permissions to view this resource. If you are an administrator, please sign in to the Admin Portal.
+        </p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+        <a href="{% url 'store:home' %}" 
+           class="w-full sm:w-auto px-8 py-3.5 bg-brand hover:bg-brand-hover text-customText-white font-bold text-sm rounded-xl shadow-lg shadow-brand/20 hover:scale-[1.02] transform transition">
+            &larr; Back to Storefront
+        </a>
+    </div>
+</div>
+{% endblock %}

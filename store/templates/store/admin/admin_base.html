@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel | Twosomesty{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        heading: ['Roboto Condensed', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            DEFAULT: '#d20a2e',
+                            hover: '#b00824',
+                        },
+                        adminBg: '#F9F6F0',
+                        adminCard: '#FFFFFF',
+                        darkSidebar: '#0B0F14',
+                        adminBorder: '#E2E8F0',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-adminBg text-slate-800 min-h-screen font-sans flex flex-col" x-data="{ sidebarOpen: false }">
+
+    <!-- Top Admin Header -->
+    <header class="bg-darkSidebar border-b border-white/10 sticky top-0 z-40 h-16 flex items-center justify-between px-4 sm:px-8 shadow-md">
+        <div class="flex items-center gap-4">
+            <!-- Mobile Menu Toggle -->
+            <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-slate-300 hover:text-white p-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+
+            <!-- Admin Logo & Badge -->
+            <a href="{% url 'store:admin_dashboard' %}" class="flex items-center gap-3">
+                <img src="{% static 'images/brand_logo.png' %}" alt="Twosome Logo" class="h-12 sm:h-14 md:h-16 w-auto object-contain">
+                <span class="bg-brand/20 border border-brand/40 text-brand text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-widest">ADMIN PORTAL</span>
+            </a>
+        </div>
+
+        <div class="flex items-center gap-4 sm:gap-6 text-sm">
+            <!-- Link to main store -->
+            <a href="{% url 'store:home' %}" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg border border-white/10 transition">
+                <span>View Storefront</span>
+                <span>↗</span>
+            </a>
+
+            <!-- Admin Profile Indicator -->
+            <div class="flex items-center gap-3 border-l border-white/10 pl-4 sm:pl-6">
+                <div class="w-8 h-8 rounded-full bg-brand text-white font-bold flex items-center justify-center text-sm shadow-md">
+                    {{ request.user.username|slice:":1"|upper }}
+                </div>
+                <div class="hidden sm:block text-left">
+                    <div class="text-xs font-bold text-white leading-none">{{ request.user.username }}</div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">Administrator</div>
+                </div>
+            </div>
+
+            <!-- Logout -->
+            <a href="{% url 'store:admin_logout' %}" class="text-xs font-semibold text-slate-300 hover:text-brand transition">
+                Logout
+            </a>
+        </div>
+    </header>
+
+    <div class="flex flex-1">
+        <!-- Sidebar Navigation -->
+        <aside class="fixed inset-y-0 left-0 z-30 w-64 bg-darkSidebar border-r border-white/10 transform transition-transform duration-300 md:translate-x-0 md:static md:inset-auto md:w-64 flex flex-col justify-between pt-16 md:pt-0"
+               :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+            <div class="p-4 space-y-1">
+                <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-heading">Core Management</div>
+                
+                <a href="{% url 'store:admin_dashboard' %}" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-brand text-white shadow-lg shadow-brand/20{% else %}text-slate-300 hover:bg-white/10 hover:text-white{% endif %}">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="{% url 'store:admin_products' %}" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {% if 'admin_product' in request.resolver_match.url_name %}bg-brand text-white shadow-lg shadow-brand/20{% else %}text-slate-300 hover:bg-white/10 hover:text-white{% endif %}">
+                    <span>📦</span>
+                    <span>Products & Stock</span>
+                </a>
+
+                <a href="{% url 'store:admin_orders' %}" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {% if 'admin_order' in request.resolver_match.url_name %}bg-brand text-white shadow-lg shadow-brand/20{% else %}text-slate-300 hover:bg-white/10 hover:text-white{% endif %}">
+                    <span>🛍️</span>
+                    <span>Orders & Fulfillment</span>
+                </a>
+
+                <a href="{% url 'store:admin_categories' %}" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {% if 'admin_category' in request.resolver_match.url_name %}bg-brand text-white shadow-lg shadow-brand/20{% else %}text-slate-300 hover:bg-white/10 hover:text-white{% endif %}">
+                    <span>📁</span>
+                    <span>Categories</span>
+                </a>
+
+                <a href="{% url 'store:admin_coupons' %}" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {% if 'admin_coupon' in request.resolver_match.url_name %}bg-brand text-white shadow-lg shadow-brand/20{% else %}text-slate-300 hover:bg-white/10 hover:text-white{% endif %}">
+                    <span>🎟️</span>
+                    <span>Discounts & Coupons</span>
+                </a>
+
+                <a href="{% url 'store:admin_reviews' %}" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {% if 'admin_review' in request.resolver_match.url_name %}bg-brand text-white shadow-lg shadow-brand/20{% else %}text-slate-300 hover:bg-white/10 hover:text-white{% endif %}">
+                    <span>⭐</span>
+                    <span>Customer Reviews</span>
+                </a>
+
+                <a href="{% url 'store:admin_carousel' %}" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {% if 'admin_carousel' in request.resolver_match.url_name %}bg-brand text-white shadow-lg shadow-brand/20{% else %}text-slate-300 hover:bg-white/10 hover:text-white{% endif %}">
+                    <span>🎠</span>
+                    <span>Carousel Banners</span>
+                </a>
+
+                <a href="{% url 'store:admin_users' %}" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition {% if 'admin_user' in request.resolver_match.url_name %}bg-brand text-white shadow-lg shadow-brand/20{% else %}text-slate-300 hover:bg-white/10 hover:text-white{% endif %}">
+                    <span>👥</span>
+                    <span>Customer Accounts</span>
+                </a>
+            </div>
+
+            <!-- Footer info inside sidebar -->
+            <div class="p-4 border-t border-white/10 text-xs text-slate-400 text-center">
+                Twosomesty Store v2.0
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 sm:p-8 overflow-y-auto max-w-7xl">
+            <!-- Messages -->
+            {% if messages %}
+                <div class="space-y-3 mb-6">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-xl text-sm font-medium border flex items-center justify-between shadow-sm {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700{% else %}bg-emerald-50 border-emerald-200 text-emerald-700{% endif %}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+</body>
+</html>

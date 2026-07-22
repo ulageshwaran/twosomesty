@@ -1,0 +1,102 @@
+{% extends "store/base.html" %}
+
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Address | Twosomesty Streetwear Chennai{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-8 text-sm text-customText-gray">
+        <a href="{% url 'store:home' %}" class="hover:text-brand transition">Home</a>
+        <span class="mx-2">/</span>
+        <a href="{% url 'store:profile' %}" class="hover:text-brand transition">Account</a>
+        <span class="mx-2">/</span>
+        <a href="{% url 'store:address_list' %}" class="hover:text-brand transition">Addresses</a>
+        <span class="mx-2">/</span>
+        <span class="text-customText-white">{% if object %}Edit{% else %}Add{% endif %} Address</span>
+    </nav>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Sidebar Navigation -->
+        <div class="space-y-4">
+            <div class="bg-surface-card border border-surface-border rounded-2xl p-6">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-xl uppercase">
+                        {{ user.username|slice:":2" }}
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-customText-white">{{ user.first_name }} {{ user.last_name }}</h2>
+                        <p class="text-xs text-customText-gray">{{ user.email }}</p>
+                    </div>
+                </div>
+                
+                <nav class="flex flex-col space-y-1">
+                    <a href="{% url 'store:profile' %}" class="px-4 py-3 rounded-xl hover:bg-surface-slate text-customText-gray hover:text-customText-white transition">
+                        👤 Profile Details
+                    </a>
+                    <a href="{% url 'store:address_list' %}" class="px-4 py-3 rounded-xl bg-brand text-customText-white font-semibold transition">
+                        📍 Saved Addresses
+                    </a>
+                    <a href="{% url 'store:order_history' %}" class="px-4 py-3 rounded-xl hover:bg-surface-slate text-customText-gray hover:text-customText-white transition">
+                        📦 Order History
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Form Area -->
+        <div class="md:col-span-2">
+            <div class="bg-surface-card border border-surface-border rounded-3xl p-8 shadow-2xl">
+                <h3 class="text-2xl font-bold font-heading text-customText-white mb-6">
+                    {% if object %}Edit{% else %}Add New{% endif %} Address
+                </h3>
+
+                <form method="post" class="space-y-5">
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                        {% if field.name == 'is_default' %}
+                            <div class="flex items-start pt-2">
+                                <div class="flex items-center h-5">
+                                    <input id="{{ field.id_for_label }}" name="{{ field.name }}" type="checkbox" {% if field.value %}checked{% endif %}
+                                           class="w-4 h-4 rounded bg-surface-slate border-surface-border text-brand focus:ring-brand focus:ring-opacity-50">
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="{{ field.id_for_label }}" class="font-semibold text-customText-white">Set as default address</label>
+                                    <p class="text-customText-gray text-xs mt-0.5">Use this address as my primary shipping choice for all checkout steps.</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="space-y-2">
+                                <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-customText-white">
+                                    {{ field.label }}
+                                </label>
+                                <input type="text"
+                                       name="{{ field.name }}"
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value|default_if_none:'' }}"
+                                       {% if field.field.required %}required{% endif %}
+                                       placeholder="{{ field.field.widget.attrs.placeholder }}"
+                                       class="w-full px-4 py-3 rounded-xl bg-surface-slate border border-surface-border text-customText-white placeholder-customText-gray focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition duration-300">
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="flex items-center space-x-4 pt-6">
+                        <button type="submit" class="px-8 py-3 rounded-xl bg-brand text-customText-white font-bold hover:bg-brand-hover hover:scale-105 transition transform duration-300 shadow-md shadow-brand/20">
+                            {% if object %}Update{% else %}Save{% endif %} Address
+                        </button>
+                        <a href="{% url 'store:address_list' %}" class="px-6 py-3 rounded-xl border border-surface-border text-customText-gray hover:bg-surface-slate hover:text-customText-white transition font-bold">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
