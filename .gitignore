@@ -46,7 +46,6 @@ media/
 # Static files collected by collectstatic
 staticfiles/
 static_root/
-static/
 secrets.json
 clothing-ecommerce-prd.md
 # Django secret key / sensitive settings
