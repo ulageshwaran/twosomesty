@@ -44,8 +44,7 @@ db.sqlite3-journal
 media/
 
 # Static files collected by collectstatic
-staticfiles/
-static_root/
+
 secrets.json
 clothing-ecommerce-prd.md
 # Django secret key / sensitive settings
