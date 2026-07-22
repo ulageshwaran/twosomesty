@@ -18,13 +18,7 @@
                         {% else %}
                             <div class="w-full h-full flex items-center justify-center bg-surface-slate text-customText-gray text-xs">No Image</div>
                         {% endif %}
-                        
-                        <!-- Sale Badge -->
-                        {% if product.discount_price %}
-                            <span class="absolute top-4 left-4 bg-brand-accent text-customText-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
-                                SALE
-                            </span>
-                        {% endif %}
+
 
                         <!-- Out of Stock Badge -->
                         {% if product.total_stock <= 0 %}
