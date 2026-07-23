@@ -496,6 +496,13 @@
 
                 <!-- Account Links -->
                 {% if user.is_authenticated %}
+                {% if user.is_staff or user.is_superuser %}
+                <a href="{% url 'store:admin_dashboard' %}" @click="mobileOpen = false"
+                    class="flex items-center px-3 py-3 rounded-xl text-base font-extrabold text-brand hover:bg-surface-card transition">
+                    <span class="text-xl mr-3">⚡</span>
+                    Admin Panel
+                </a>
+                {% endif %}
                 <a href="{% url 'store:profile' %}" @click="mobileOpen = false"
                     class="flex items-center px-3 py-3 rounded-xl text-base font-extrabold text-customText-white hover:bg-surface-card hover:text-brand transition">
                     <svg class="w-5 h-5 mr-3 text-customText-gray" fill="none" stroke="currentColor"
