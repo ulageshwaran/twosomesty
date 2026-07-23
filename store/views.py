@@ -338,12 +338,22 @@ def cart_add_ajax(request):
     if buy_now:
         return redirect('store:cart_detail')
     
+    messages.success(request, f"Added '{variant.product.name}' to your cart!")
+    
     # Check if HTMX request
     if request.headers.get('HX-Request') == 'true':
-        # Render the updated cart drawer list
-        context = {'cart': cart, 'cart_count': cart_count}
-        response_html = render_to_string('store/partials/cart_drawer_content.html', context, request=request)
-        return HttpResponse(response_html)
+        cart_badge_html = f'<span id="cart-badge" hx-swap-oob="true" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xxs font-extrabold leading-none text-customText-white bg-brand rounded-full">{cart_count}</span>'
+        
+        import json
+        toast_payload = json.dumps({
+            "showToast": {
+                "title": "Item Added to Cart! 🛍️",
+                "message": f"{variant.product.name} ({variant.size}/{variant.color}) added to your bag."
+            }
+        })
+        response = HttpResponse(cart_badge_html)
+        response['HX-Trigger'] = toast_payload
+        return response
         
     return redirect('store:cart_detail')
 

@@ -596,6 +596,58 @@
             </div>
         </div>
     </footer>
+    <!-- Toast Alert Notification Container (For Add-To-Cart & System Alerts) -->
+    <div id="toast-container" 
+         x-data="{ show: false, message: '', title: '' }" 
+         @show-toast.window="title = $event.detail.title || 'Notification'; message = $event.detail.message; show = true; setTimeout(() => show = false, 4500)"
+         x-show="show" x-cloak
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:translate-x-4 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 sm:translate-x-0 scale-100"
+         x-transition:leave="transition ease-in duration-200 transform"
+         x-transition:leave-start="opacity-100 translate-y-0 sm:translate-x-0 scale-100"
+         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:translate-x-4 scale-95"
+         class="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-surface-card border-2 border-brand p-4 shadow-2xl rounded-2xl flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-brand/20 text-brand border border-brand/30 flex items-center justify-center text-xl flex-shrink-0">
+                🛍️
+            </div>
+            <div class="min-w-0 flex-1">
+                <h4 class="text-xs sm:text-sm font-extrabold text-customText-white font-roboto uppercase tracking-wider truncate" x-text="title"></h4>
+                <p class="text-xs text-customText-gray mt-0.5 leading-tight truncate" x-text="message"></p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <a href="{% url 'store:cart_detail' %}" class="px-3 py-1.5 rounded-lg bg-brand text-white font-extrabold text-xs hover:bg-brand-hover transition whitespace-nowrap">
+                View Cart
+            </a>
+            <button @click="show = false" class="text-customText-gray hover:text-white text-lg font-bold px-1 focus:outline-none">
+                &times;
+            </button>
+        </div>
+    </div>
+
+    <!-- Django Flash Messages Listener -->
+    {% if messages %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                {% for message in messages %}
+                    window.dispatchEvent(new CustomEvent('show-toast', { 
+                        detail: { 
+                            title: "ITEM ADDED TO CART 🛍️", 
+                            message: "{{ message|escapejs }}" 
+                        } 
+                    }));
+                {% endfor %}
+            });
+        </script>
+    {% endif %}
+
+    <script>
+        document.body.addEventListener("showToast", function(evt) {
+            window.dispatchEvent(new CustomEvent('show-toast', { detail: evt.detail }));
+        });
+    </script>
 </body>
 
 </html>
