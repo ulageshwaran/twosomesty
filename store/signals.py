@@ -31,3 +31,24 @@ def send_order_confirmation_notifications(sender, instance, **kwargs):
             logger.info(f"Order #{instance.id} created as Paid but has no items yet. Post-save signal deferred.")
 
 
+from django.contrib.auth.signals import user_logged_in as django_user_logged_in
+try:
+    # pyrefly: ignore [missing-import]
+    from allauth.account.signals import user_logged_in as allauth_user_logged_in
+except Exception:
+    allauth_user_logged_in = None
+
+@receiver(django_user_logged_in)
+def handle_django_user_login(sender, request, user, **kwargs):
+    if request and user:
+        from .utils import merge_carts
+        merge_carts(request, user)
+
+if allauth_user_logged_in:
+    @receiver(allauth_user_logged_in)
+    def handle_allauth_user_login(sender, request, user, **kwargs):
+        if request and user:
+            from .utils import merge_carts
+            merge_carts(request, user)
+
+

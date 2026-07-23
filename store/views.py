@@ -859,12 +859,22 @@ def wishlist_toggle_ajax(request, product_id):
             Wishlist.objects.create(session_key=session_key, product=product)
             is_wishlisted = True
 
+    if request.user.is_authenticated:
+        wishlist_count = Wishlist.objects.filter(user=request.user).count()
+    else:
+        session_key = getattr(request.session, "session_key", None)
+        wishlist_count = Wishlist.objects.filter(session_key=session_key).count() if session_key else 0
+
     if request.headers.get('HX-Request') == 'true':
         context = {
             'product': product,
             'is_wishlisted': is_wishlisted,
+            'wishlist_count': wishlist_count,
         }
-        return render(request, 'store/partials/wishlist_button.html', context)
+        button_html = render_to_string('store/partials/wishlist_button.html', context, request=request)
+        hidden_cls = "hidden" if not wishlist_count else ""
+        oob_html = f'<span id="wishlist-badge" hx-swap-oob="true" class="{hidden_cls} absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xxs font-extrabold leading-none text-customText-white bg-rose-500 rounded-full">{wishlist_count}</span>'
+        return HttpResponse(button_html + oob_html)
 
     return redirect(request.META.get('HTTP_REFERER', 'store:home'))
 

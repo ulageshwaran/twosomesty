@@ -16,51 +16,53 @@ def get_or_create_cart(request):
         if not request.session.session_key:
             request.session.create()
         session_key = request.session.session_key
+        request.session['guest_session_key'] = session_key
         cart, created = Cart.objects.get_or_create(session_key=session_key)
     return cart
 
 
 def merge_carts(request, user):
     """
-    Merges session/guest cart items into the authenticated user's cart upon login.
+    Merges session/guest cart items and wishlist into the authenticated user's account upon login.
     If the same product variant exists in both carts, sums their quantities.
     Deletes the guest cart afterwards.
     """
-    session_key = request.session.session_key
-    if not session_key:
+    guest_key = request.session.get('guest_session_key')
+    current_key = getattr(request.session, 'session_key', None)
+    
+    keys = list(set(filter(None, [guest_key, current_key])))
+    if not keys:
         return
 
-    guest_carts = Cart.objects.filter(session_key=session_key, user=None)
-    if not guest_carts.exists():
-        return
+    guest_carts = Cart.objects.filter(session_key__in=keys, user=None)
+    if guest_carts.exists():
+        # Get or create the user's permanent cart
+        user_cart, created = Cart.objects.get_or_create(user=user)
 
-    # Get or create the user's permanent cart
-    user_cart, created = Cart.objects.get_or_create(user=user)
-
-    for guest_cart in guest_carts:
-        # Transfer items
-        for guest_item in guest_cart.items.all():
-            # Check if the variant already exists in the user's cart
-            user_item, item_created = CartItem.objects.get_or_create(
-                cart=user_cart,
-                variant=guest_item.variant,
-                defaults={'quantity': guest_item.quantity}
-            )
-            if not item_created:
-                # If it already exists, add quantities
-                user_item.quantity += guest_item.quantity
-                user_item.save()
-        
-        # Merge coupon if user cart doesn't have one and guest cart has it
-        if guest_cart.coupon and not user_cart.coupon:
-            user_cart.coupon = guest_cart.coupon
-            user_cart.save()
+        for guest_cart in guest_carts:
+            # Transfer items
+            for guest_item in guest_cart.items.all():
+                # Check if the variant already exists in the user's cart
+                user_item, item_created = CartItem.objects.get_or_create(
+                    cart=user_cart,
+                    variant=guest_item.variant,
+                    defaults={'quantity': guest_item.quantity}
+                )
+                if not item_created:
+                    # If it already exists, add quantities
+                    user_item.quantity += guest_item.quantity
+                    user_item.save()
             
-        guest_cart.delete()
+            # Merge coupon if user cart doesn't have one and guest cart has it
+            if guest_cart.coupon and not user_cart.coupon:
+                user_cart.coupon = guest_cart.coupon
+                user_cart.save()
+                
+            guest_cart.delete()
 
     # Merge guest wishlist items into user account
     from .models import Wishlist
-    guest_wishlists = Wishlist.objects.filter(session_key=session_key, user=None)
+    guest_wishlists = Wishlist.objects.filter(session_key__in=keys, user=None)
     for gw in guest_wishlists:
         if not Wishlist.objects.filter(user=user, product=gw.product).exists():
             gw.user = user
