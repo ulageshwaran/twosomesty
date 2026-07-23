@@ -72,7 +72,4 @@ urlpatterns = [
     path('500/', views.custom_500_view, name='preview_500'),
     path('403/', views.custom_403_view, name='preview_403'),
     path('400/', views.custom_400_view, name='preview_400'),
-
-    # Catch-all 404 handler for invalid URLs (excluding media and static routes)
-    re_path(r'^(?!(media|static)/).*$', views.custom_404_view, name='catch_all_404'),
 ]
