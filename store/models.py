@@ -454,8 +454,8 @@ class Order(models.Model):
         if self.address and self.address.state:
             state_lower = self.address.state.strip().lower()
         if state_lower in ['tamil nadu', 'tamilnadu', 'tn']:
-            return "Within Tamil Nadu: 2 - 3 Days"
-        return "Out Of State: 3 - 7 Days"
+            return "2 - 3 Days"
+        return "3 - 7 Days"
 
     def __str__(self):
         return f"Order #{self.id} ({self.status})"
