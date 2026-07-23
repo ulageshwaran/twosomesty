@@ -18,9 +18,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.sitemaps.views import sitemap
+from store.sitemaps import ProductSitemap, CategorySitemap, StaticViewSitemap
+
+sitemaps = {
+    'products': ProductSitemap,
+    'categories': CategorySitemap,
+    'static': StaticViewSitemap,
+}
 
 urlpatterns = [
     path('twosomeadmin/', admin.site.urls),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path("silk/", include("silk.urls", namespace="silk")),
     path('accounts/google/', include('allauth.socialaccount.providers.google.urls')),
     path('accounts/3rdparty/', include('allauth.socialaccount.urls')),
@@ -37,4 +46,3 @@ handler404 = 'store.views.custom_404_view'
 handler500 = 'store.views.custom_500_view'
 handler403 = 'store.views.custom_403_view'
 handler400 = 'store.views.custom_400_view'
-
