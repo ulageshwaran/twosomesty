@@ -233,7 +233,10 @@
 
             <div class="p-4 sm:p-6 flex flex-col flex-grow justify-between">
                 <div>
-                    <span class="text-xs text-customText-gray font-medium tracking-wide uppercase">{{ product.category.name }}</span>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-customText-gray font-medium tracking-wide uppercase">{{ product.category.name }}</span>
+                        {% include "store/partials/wishlist_button.html" with product=product %}
+                    </div>
                     <a href="{% url 'store:product_detail' product.slug %}"
                         class="block mt-1 font-bold text-customText-white hover:text-brand transition text-sm sm:text-base leading-snug">
                         {{ product.name }}
