@@ -54,6 +54,13 @@ class StoreConfig(AppConfig):
                 except Exception:
                     pass
 
+                # Self-healing auto-create and seed django_site table for allauth
+                try:
+                    cursor.execute("CREATE TABLE IF NOT EXISTS django_site (id integer PRIMARY KEY AUTOINCREMENT, domain varchar(100) NOT NULL, name varchar(50) NOT NULL);")
+                    cursor.execute("INSERT OR IGNORE INTO django_site (id, domain, name) VALUES (1, '127.0.0.1:8000', 'Twosomesty');")
+                except Exception:
+                    pass
+
                 conn.commit()
                 conn.close()
             except Exception:

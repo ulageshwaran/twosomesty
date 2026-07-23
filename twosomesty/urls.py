@@ -22,6 +22,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('twosomeadmin/', admin.site.urls),
     path("silk/", include("silk.urls", namespace="silk")),
+    path('accounts/google/', include('allauth.socialaccount.providers.google.urls')),
+    path('accounts/3rdparty/', include('allauth.socialaccount.urls')),
     path('', include('store.urls')),
     path('accounts/', include('allauth.urls')),
 ]
