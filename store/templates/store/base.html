@@ -17,6 +17,15 @@
         rel="stylesheet">
 
     <!-- Tailwind CSS CDN -->
+    <script>
+        (function() {
+            var _warn = console.warn;
+            console.warn = function(msg) {
+                if (typeof msg === 'string' && msg.includes('cdn.tailwindcss.com')) return;
+                _warn.apply(console, arguments);
+            };
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
