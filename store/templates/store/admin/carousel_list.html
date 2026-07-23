@@ -12,7 +12,7 @@
             <h1 class="text-3xl font-extrabold text-slate-900 font-heading tracking-wide">HERO CAROUSEL BANNERS</h1>
             <p class="text-xs text-slate-500 mt-1">Manage homepage slideshow slides, call-to-action buttons, and promotional banners.</p>
         </div>
-        <button @click="editMode = false; slideData = { id: '', title: '', subtitle: '', description: '', button_text: 'Shop Collection', button_link: '/category/all/', order: 0, is_active: true }; showModal = true"
+        <button @click="editMode = false; slideData = { id: '', title: '', subtitle: '', description: '', button_text: 'Shop Collection', button_link: '#new-arrivals', order: 0, is_active: true }; showModal = true"
                 class="bg-brand hover:bg-brand-hover text-white text-xs font-bold px-5 py-3 rounded-xl shadow transition flex items-center gap-2 self-start sm:self-auto">
             <span>+</span>
             <span>Add New Slide</span>
@@ -87,7 +87,7 @@
             <div class="text-4xl">🎠</div>
             <h3 class="text-lg font-bold text-slate-900">No Carousel Banners Found</h3>
             <p class="text-xs text-slate-500 max-w-sm mx-auto">Create your first homepage slide to display hero banners to customers!</p>
-            <button @click="editMode = false; slideData = { id: '', title: '', subtitle: '', description: '', button_text: 'Shop Collection', button_link: '/category/all/', order: 0, is_active: true }; showModal = true"
+            <button @click="editMode = false; slideData = { id: '', title: '', subtitle: '', description: '', button_text: 'Shop Collection', button_link: '#new-arrivals', order: 0, is_active: true }; showModal = true"
                     class="bg-brand text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow hover:bg-brand-hover transition">
                 + Add First Slide
             </button>
@@ -134,7 +134,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Button URL Link</label>
-                        <input type="text" name="button_link" :value="slideData.button_link" placeholder="e.g. /category/hoodies/"
+                        <input type="text" name="button_link" :value="slideData.button_link" placeholder="#new-arrivals"
                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-brand">
                     </div>
                 </div>

@@ -63,11 +63,14 @@
                             <td class="p-3 font-semibold text-slate-900">
                                 {{ product.variants.count }} variants
                             </td>
-                            <td class="p-3">
+                            <td class="p-3 space-y-1">
                                 {% if product.is_active %}
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">Active</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 inline-block">Active</span>
                                 {% else %}
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">Draft</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200 inline-block">Draft</span>
+                                {% endif %}
+                                {% if product.is_new_arrival %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 inline-block">New Arrival</span>
                                 {% endif %}
                             </td>
                             <td class="p-3 text-right space-x-2 whitespace-nowrap">

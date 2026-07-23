@@ -259,11 +259,18 @@
                 <option value="34">
             </datalist>
 
-            <!-- Active Checkbox -->
-            <div class="flex items-center gap-3 pt-2">
-                <input type="checkbox" name="is_active" id="id_is_active" {% if form.is_active.value or not object %}checked{% endif %}
-                       class="w-5 h-5 accent-brand rounded border-slate-300">
-                <label for="id_is_active" class="text-sm font-semibold text-slate-900">Active (Visible on storefront)</label>
+            <!-- Active & New Arrival Checkboxes -->
+            <div class="flex flex-wrap items-center gap-6 pt-2">
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" name="is_active" id="id_is_active" {% if form.is_active.value or not object %}checked{% endif %}
+                           class="w-5 h-5 accent-brand rounded border-slate-300">
+                    <label for="id_is_active" class="text-sm font-semibold text-slate-900">Active (Visible on storefront)</label>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" name="is_new_arrival" id="id_is_new_arrival" {% if form.is_new_arrival.value or not object %}checked{% endif %}
+                           class="w-5 h-5 accent-brand rounded border-slate-300">
+                    <label for="id_is_new_arrival" class="text-sm font-semibold text-slate-900">🔥 Show in New Arrivals (Homepage)</label>
+                </div>
             </div>
 
             <!-- Form Actions -->

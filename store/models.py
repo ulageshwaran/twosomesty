@@ -118,6 +118,7 @@ class Product(models.Model):
     fabric = models.CharField(max_length=150, default='100% Organic Combed Cotton (Heavyweight)')
     weight = models.CharField(max_length=100, default='240 GSM (Oversized) / 400 GSM (Hoodies)')
     is_active = models.BooleanField(default=True)
+    is_new_arrival = models.BooleanField(default=True, help_text="Show in New Arrivals section on homepage")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

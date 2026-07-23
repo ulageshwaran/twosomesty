@@ -30,6 +30,10 @@ class StoreConfig(AppConfig):
                 except Exception:
                     pass
                 try:
+                    cursor.execute("ALTER TABLE store_product ADD COLUMN is_new_arrival bool NOT NULL DEFAULT 1;")
+                except Exception:
+                    pass
+                try:
                     cursor.execute("INSERT OR IGNORE INTO django_migrations (app, name, applied) VALUES ('store', '0012_order_shipping_partner_tracking_number', datetime('now'));")
                 except Exception:
                     pass

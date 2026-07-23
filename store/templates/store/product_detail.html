@@ -25,6 +25,7 @@
             ],
             activeIndex: 0,
             touchStartX: 0,
+            lightboxOpen: false,
             nextImage() {
                 if (this.images.length > 0) {
                     this.activeIndex = (this.activeIndex + 1) % this.images.length;
@@ -35,20 +36,37 @@
                     this.activeIndex = (this.activeIndex - 1 + this.images.length) % this.images.length;
                 }
             }
-        }">
+        }"
+        @keydown.window.escape="lightboxOpen = false"
+        @keydown.window.left="if (lightboxOpen) prevImage()"
+        @keydown.window.right="if (lightboxOpen) nextImage()">
+            
             <!-- Main Image Frame with Swipe Support and Navigation Arrows -->
             <div class="aspect-square bg-surface-card border border-surface-border overflow-hidden relative group"
                  @touchstart="touchStartX = $event.touches[0].clientX"
                  @touchend="if ($event.changedTouches[0].clientX - touchStartX > 50) prevImage(); else if (touchStartX - $event.changedTouches[0].clientX > 50) nextImage();">
                 
                 {% if product.images.first %}
-                    <img :src="images[activeIndex]" alt="{{ product.name }}" decoding="async" class="object-cover w-full h-full transition duration-500 transform hover:scale-105 cursor-zoom-in">
+                    <img :src="images[activeIndex]" 
+                         @click="lightboxOpen = true"
+                         alt="{{ product.name }}" decoding="async" 
+                         class="object-cover w-full h-full transition duration-500 transform hover:scale-105 cursor-zoom-in"
+                         title="Click to view full image">
+                    
+                    <!-- Zoom Hint Badge -->
+                    <button type="button" @click="lightboxOpen = true" 
+                            class="absolute top-4 left-4 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full opacity-80 hover:opacity-100 transition flex items-center gap-1.5 z-10 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                        </svg>
+                        <span>Enlarge</span>
+                    </button>
                     
                     <!-- Navigation Chevrons -->
-                    <button type="button" @click="prevImage()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-bg/60 border border-surface-border/50 text-customText-white flex items-center justify-center hover:bg-brand hover:border-brand transition duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100 z-10">
+                    <button type="button" @click.stop="prevImage()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-bg/60 border border-surface-border/50 text-customText-white flex items-center justify-center hover:bg-brand hover:border-brand transition duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100 z-10 cursor-pointer">
                         &larr;
                     </button>
-                    <button type="button" @click="nextImage()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-bg/60 border border-surface-border/50 text-customText-white flex items-center justify-center hover:bg-brand hover:border-brand transition duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100 z-10">
+                    <button type="button" @click.stop="nextImage()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-bg/60 border border-surface-border/50 text-customText-white flex items-center justify-center hover:bg-brand hover:border-brand transition duration-300 opacity-0 group-hover:opacity-100 focus:opacity-100 z-10 cursor-pointer">
                         &rarr;
                     </button>
                     
@@ -70,13 +88,71 @@
                     {% for img in product.images.all %}
                         <button type="button"
                                 @click="activeIndex = {{ forloop.index0 }}" 
-                                class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-surface-card border border-surface-border overflow-hidden hover:border-brand focus:outline-none transition-all duration-300"
+                                class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-surface-card border border-surface-border overflow-hidden hover:border-brand focus:outline-none transition-all duration-300 cursor-pointer"
                                 :class="{ 'border-brand ring-2 ring-brand/20': activeIndex === {{ forloop.index0 }} }">
                             <img src="{{ img.thumbnail_url }}" alt="Thumbnail" loading="lazy" decoding="async" class="object-cover w-full h-full">
                         </button>
                     {% endfor %}
                 </div>
             {% endif %}
+
+            <!-- Full-Screen Lightbox Modal -->
+            <div x-show="lightboxOpen" 
+                 x-cloak
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 sm:p-8">
+                
+                <!-- Lightbox Top Controls -->
+                <div class="flex items-center justify-between text-white z-20">
+                    <span class="text-xs font-bold tracking-widest uppercase text-neutral-400">
+                        Image <span x-text="activeIndex + 1"></span> of <span x-text="images.length"></span>
+                    </span>
+                    <button @click="lightboxOpen = false" class="text-white hover:text-brand text-xl font-extrabold px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full transition cursor-pointer">
+                        ✕
+                    </button>
+                </div>
+
+                <!-- Lightbox Image Viewport -->
+                <div class="relative flex-1 flex items-center justify-center my-4 overflow-hidden"
+                     @touchstart="touchStartX = $event.touches[0].clientX"
+                     @touchend="if ($event.changedTouches[0].clientX - touchStartX > 50) prevImage(); else if (touchStartX - $event.changedTouches[0].clientX > 50) nextImage();">
+                    
+                    <img :src="images[activeIndex]" 
+                         alt="{{ product.name }}" 
+                         class="max-h-[80vh] max-w-[90vw] object-contain shadow-2xl transition duration-300">
+
+                    <!-- Lightbox Prev / Next Chevrons -->
+                    <template x-if="images.length > 1">
+                        <button type="button" @click="prevImage()" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-brand text-white flex items-center justify-center text-xl transition duration-300 cursor-pointer">
+                            &larr;
+                        </button>
+                    </template>
+                    <template x-if="images.length > 1">
+                        <button type="button" @click="nextImage()" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-brand text-white flex items-center justify-center text-xl transition duration-300 cursor-pointer">
+                            &rarr;
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Lightbox Bottom Thumbnails Bar -->
+                <template x-if="images.length > 1">
+                    <div class="flex justify-center gap-2 overflow-x-auto py-2 z-20">
+                        <template x-for="(img, idx) in images" :key="idx">
+                            <button type="button"
+                                    @click="activeIndex = idx" 
+                                    class="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 bg-neutral-900 border rounded-lg overflow-hidden transition cursor-pointer"
+                                    :class="activeIndex === idx ? 'border-brand ring-2 ring-brand' : 'border-neutral-700 opacity-60 hover:opacity-100'">
+                                <img :src="img" alt="Thumbnail" class="object-cover w-full h-full">
+                            </button>
+                        </template>
+                    </div>
+                </template>
+            </div>
         </div>
 
         <!-- Right Column: Product Specs & Actions -->

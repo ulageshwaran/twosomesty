@@ -32,7 +32,7 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context["products"] = (
-            Product.objects.filter(is_active=True)
+            Product.objects.filter(is_active=True, is_new_arrival=True)
             .select_related("category")
             .prefetch_related("images", "variants")
             .order_by("-created_at")[:8]

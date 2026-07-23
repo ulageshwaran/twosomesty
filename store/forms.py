@@ -56,4 +56,4 @@ class AddressForm(forms.ModelForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'category', 'base_price', 'discount_price', 'description', 'brand', 'fabric', 'weight', 'is_active']
+        fields = ['name', 'category', 'base_price', 'discount_price', 'description', 'brand', 'fabric', 'weight', 'is_active', 'is_new_arrival']
