@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto" x-data="{ 
     showNewAddressForm: {% if not addresses %}true{% else %}false{% endif %},
     selectedAddressId: '{% for addr in addresses %}{% if addr.is_default %}{{ addr.id }}{% endif %}{% endfor %}' || '{% if addresses %}{{ addresses.0.id }}{% else %}new{% endif %}',
-    newState: '{{ address_form.state.value|default:"Tamil Nadu"|escapejs }}',
+    newState: '{{ address_form.state.value|default:""|escapejs }}',
     subtotal: parseFloat('{{ cart.subtotal }}'),
     discount: parseFloat('{{ cart.discount_amount|default:"0" }}'),
     jacketsCount: {{ jackets_count|default:0 }},
@@ -24,6 +24,14 @@
         }
         let addr = this.addresses.find(a => String(a.id) === String(this.selectedAddressId));
         return addr ? addr.state.trim().toLowerCase() : '';
+    },
+    get deliveryEstimate() {
+        let state = this.activeState;
+        if (!state) {
+            return 'Enter State for Delivery Estimate';
+        }
+        let isTN = (state === 'tamil nadu' || state === 'tamilnadu' || state === 'tn');
+        return isTN ? 'Within Tamil Nadu: 2 - 3 Days' : 'Out Of State: 3 - 7 Days';
     },
     get shippingAmount() {
         let net = this.subtotal - this.discount;
@@ -57,11 +65,24 @@
         {% csrf_token %}
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Column: Shipping Details -->
+            <!-- Left Column: Shipping Details & Payment Option -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Address Section -->
                 <div class="bg-surface-card border border-surface-border rounded-3xl p-8 space-y-6">
-                    <h2 class="text-xl font-extrabold text-customText-white uppercase tracking-wider font-heading">Shipping Address</h2>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-extrabold text-customText-white uppercase tracking-wider font-heading">Shipping Address</h2>
+                        <!-- Dynamic Delivery Estimate Badge -->
+                        <div class="hidden sm:flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full">
+                            <span class="text-xs font-bold text-emerald-400 animate-pulse">🚚 Delivery:</span>
+                            <span class="text-xs font-extrabold text-customText-white" x-text="deliveryEstimate"></span>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Delivery Estimate Badge -->
+                    <div class="sm:hidden flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-2 rounded-xl">
+                        <span class="text-xs font-bold text-emerald-400">🚚 Delivery:</span>
+                        <span class="text-xs font-extrabold text-customText-white" x-text="deliveryEstimate"></span>
+                    </div>
                     
                     {% if addresses %}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -128,8 +149,8 @@
                             </div>
 
                             <div class="space-y-2">
-                                <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">Recipient Email (optional)</label>
-                                <input type="email" name="email" value="{{ address_form.email.value|default:'' }}" placeholder="e.g. john@example.com" class="w-full bg-surface-slate border border-surface-border rounded-xl px-4 py-3 text-sm text-customText-white focus:outline-none focus:border-brand placeholder-customText-gray">
+                                <label class="text-xs font-bold text-customText-gray uppercase tracking-wider block">Recipient Email</label>
+                                <input type="email" name="email" value="{{ address_form.email.value|default:'' }}" placeholder="e.g. john@example.com" :required="showNewAddressForm" class="w-full bg-surface-slate border border-surface-border rounded-xl px-4 py-3 text-sm text-customText-white focus:outline-none focus:border-brand placeholder-customText-gray">
                                 {% if address_form.email.errors %}
                                     <p class="text-xs text-red-400 mt-1 font-medium">{{ address_form.email.errors.as_text }}</p>
                                 {% endif %}
@@ -177,6 +198,31 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Payment Options Section (Accepting ONLY online payment via Razorpay) -->
+                <div class="bg-surface-card border border-surface-border rounded-3xl p-8 space-y-4">
+                    <h2 class="text-xl font-extrabold text-customText-white uppercase tracking-wider font-heading">Payment Method</h2>
+                    
+                    <div class="border-2 border-brand rounded-2xl p-5 bg-brand/5 flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                                💳
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-extrabold text-customText-white">Online Payment (Razorpay Secure)</h4>
+                                <p class="text-xs text-customText-gray">Instant Payment via UPI, GPay, PhonePe, Cards & NetBanking</p>
+                            </div>
+                        </div>
+                        <span class="text-xxs font-extrabold px-3 py-1 bg-brand text-white rounded-full uppercase tracking-wider flex-shrink-0">ACCEPTED ONLY</span>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-xs text-customText-gray pt-1">
+                        <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                        <span>We accept ONLY online payment via Razorpay. Cash on delivery (COD) is disabled.</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Right Column: Order Summary & Placement -->
@@ -222,9 +268,14 @@
                             </div>
                         {% endif %}
 
-                        <div class="flex justify-between items-center text-sm border-b border-surface-border/50 pb-4">
+                        <div class="flex justify-between items-center text-sm">
                             <span class="text-customText-gray">Shipping</span>
-                                <span>₹<span x-text="shippingAmount"></span></span>
+                            <span>₹<span x-text="shippingAmount"></span></span>
+                        </div>
+
+                        <div class="flex justify-between items-center text-xs border-b border-surface-border/50 pb-4 text-emerald-400 font-bold">
+                            <span>Delivery Time</span>
+                            <span x-text="deliveryEstimate"></span>
                         </div>
 
                         <div class="flex justify-between items-center text-lg font-extrabold text-customText-white pt-2">
@@ -236,7 +287,7 @@
                     <!-- Place Order Action -->
                     <div class="pt-4">
                         <button type="submit" class="w-full py-4 text-center font-bold text-sm bg-brand text-customText-white rounded-xl hover:bg-brand-hover hover:scale-[1.02] transform transition shadow-lg shadow-brand/10 focus:outline-none">
-                            Place Order
+                            Proceed to Online Payment
                         </button>
                     </div>
                 </div>

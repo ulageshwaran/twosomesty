@@ -37,12 +37,13 @@ class ProfileForm(forms.ModelForm):
 
 
 class AddressForm(forms.ModelForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'placeholder': 'Recipient Email Address'}))
+
     class Meta:
         model = Address
         fields = ['full_name', 'email', 'phone', 'line1', 'line2', 'city', 'state', 'pincode', 'is_default']
         widgets = {
             'full_name': forms.TextInput(attrs={'placeholder': 'Recipient Full Name'}),
-            'email': forms.EmailInput(attrs={'placeholder': 'Recipient Email Address (optional)'}),
             'phone': forms.TextInput(attrs={'placeholder': 'Recipient Phone Number'}),
             'line1': forms.TextInput(attrs={'placeholder': 'Street Address, P.O. box, company name'}),
             'line2': forms.TextInput(attrs={'placeholder': 'Apartment, suite, unit, building, floor, etc. (optional)'}),

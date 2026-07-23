@@ -18,6 +18,10 @@ class StoreConfig(AppConfig):
                 conn = sqlite3.connect(db_path)
                 cursor = conn.cursor()
                 try:
+                    cursor.execute("ALTER TABLE store_wishlist ADD COLUMN session_key varchar(40) NULL;")
+                except Exception:
+                    pass
+                try:
                     cursor.execute("ALTER TABLE store_order ADD COLUMN shipping_partner varchar(100) NULL;")
                 except Exception:
                     pass

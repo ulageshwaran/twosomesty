@@ -58,6 +58,17 @@ def merge_carts(request, user):
             
         guest_cart.delete()
 
+    # Merge guest wishlist items into user account
+    from .models import Wishlist
+    guest_wishlists = Wishlist.objects.filter(session_key=session_key, user=None)
+    for gw in guest_wishlists:
+        if not Wishlist.objects.filter(user=user, product=gw.product).exists():
+            gw.user = user
+            gw.session_key = None
+            gw.save()
+        else:
+            gw.delete()
+
 
 import logging
 import requests

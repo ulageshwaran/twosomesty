@@ -448,6 +448,15 @@ class Order(models.Model):
         from decimal import Decimal
         return Decimal('0.00')
 
+    @property
+    def delivery_estimate(self):
+        state_lower = ''
+        if self.address and self.address.state:
+            state_lower = self.address.state.strip().lower()
+        if state_lower in ['tamil nadu', 'tamilnadu', 'tn']:
+            return "Within Tamil Nadu: 2 - 3 Days"
+        return "Out Of State: 3 - 7 Days"
+
     def __str__(self):
         return f"Order #{self.id} ({self.status})"
 
@@ -472,15 +481,15 @@ class OrderItem(models.Model):
 
 # 12. Wishlist Model
 class Wishlist(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlists')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='wishlists')
+    session_key = models.CharField(max_length=40, null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = ('user', 'product')
-
     def __str__(self):
-        return f"{self.user.username} - {self.product.name}"
+        if self.user:
+            return f"{self.user.username} - {self.product.name}"
+        return f"Guest ({self.session_key}) - {self.product.name}"
 
 
 # 13. ProductReview Model

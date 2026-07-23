@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('twosomeadmin/', admin.site.urls),
     path("silk/", include("silk.urls", namespace="silk")),
+    path('accounts/', include('allauth.urls')),
 ]
 
 if settings.DEBUG:

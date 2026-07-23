@@ -239,6 +239,11 @@
                         </span>
                     </div>
 
+                    <div class="flex justify-between items-center text-xs text-emerald-400 font-bold border-b border-surface-border/50 pb-4">
+                        <span>Delivery Time</span>
+                        <span>🚚 {{ order.delivery_estimate }}</span>
+                    </div>
+
                     <div class="border-t border-surface-border/50 pt-4 flex justify-between items-center text-base font-extrabold text-customText-white">
                         <span>Grand Total</span>
                         <span class="text-xl text-brand">₹{{ order.total_amount }}</span>

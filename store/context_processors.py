@@ -35,14 +35,19 @@ def cart_processor(request):
 
 def wishlist_processor(request):
     """
-    Passes list of wishlisted product IDs to all templates.
+    Passes list of wishlisted product IDs to all templates for both logged-in and guest users.
     """
     user = getattr(request, "user", None)
+    from .models import Wishlist
 
     if user and user.is_authenticated:
         wishlist_product_ids = set(user.wishlists.values_list("product_id", flat=True))
     else:
-        wishlist_product_ids = set()
+        session_key = getattr(request.session, "session_key", None)
+        if session_key:
+            wishlist_product_ids = set(Wishlist.objects.filter(session_key=session_key).values_list("product_id", flat=True))
+        else:
+            wishlist_product_ids = set()
     return {
         'wishlist_product_ids': wishlist_product_ids
     }

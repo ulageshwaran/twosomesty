@@ -1,0 +1,38 @@
+{% extends "store/base.html" %}
+
+{% block title %}Complete Registration | Twosomesty{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto my-12">
+    <div class="bg-surface-card border border-surface-border rounded-3xl p-8 shadow-2xl space-y-6">
+        <div class="text-center space-y-2">
+            <h2 class="text-3xl font-extrabold font-heading text-customText-white">Complete Profile</h2>
+            <p class="text-sm text-customText-gray">You are signing in with your Google account. Please confirm your details below.</p>
+        </div>
+
+        <form method="post" action="{% url 'socialaccount_signup' %}" class="space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="space-y-1">
+                    <label for="{{ field.id_for_label }}" class="block text-xs font-bold text-customText-white uppercase tracking-wider">
+                        {{ field.label }}
+                    </label>
+                    <input type="{{ field.field.widget.input_type|default:'text' }}"
+                           name="{{ field.name }}"
+                           id="{{ field.id_for_label }}"
+                           value="{{ field.value|default_if_none:'' }}"
+                           class="w-full px-4 py-3 rounded-xl bg-surface-slate border border-surface-border text-customText-white text-sm focus:outline-none focus:border-brand">
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="w-full py-4 px-6 rounded-xl bg-brand text-customText-white font-bold hover:bg-brand-hover hover:scale-[1.02] transform transition duration-300 shadow-lg shadow-brand/20">
+                Continue to Store
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "store/base.html" %}
+
+{% block title %}Sign Out | Twosomesty Streetwear Chennai{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto my-12">
+    <div class="bg-surface-card border border-surface-border rounded-3xl p-8 shadow-2xl text-center space-y-6">
+        <h2 class="text-3xl font-extrabold font-heading text-customText-white">Sign Out</h2>
+        <p class="text-customText-gray">Are you sure you want to sign out of your Twosomesty account?</p>
+        
+        <form method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="w-full py-4 px-6 rounded-xl bg-brand text-customText-white font-bold hover:bg-brand-hover hover:scale-[1.02] transform transition duration-300 shadow-lg shadow-brand/20">
+                Sign Out
+            </button>
+        </form>
+        
+        <div class="pt-2">
+            <a href="{% url 'store:home' %}" class="text-xs font-semibold text-customText-gray hover:text-customText-white transition">
+                &larr; Cancel and return to home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -821,27 +821,43 @@ def search_suggest_ajax(request):
     return render(request, 'store/partials/search_suggestions.html', context)
 
 
-class WishlistListView(LoginRequiredMixin, ListView):
+class WishlistListView(ListView):
     model = Wishlist
     template_name = 'store/wishlist.html'
     context_object_name = 'wishlist_items'
 
     def get_queryset(self):
-        return Wishlist.objects.filter(user=self.request.user).select_related('product')
+        if self.request.user.is_authenticated:
+            return Wishlist.objects.filter(user=self.request.user).select_related('product')
+        session_key = self.request.session.session_key
+        if not session_key:
+            return Wishlist.objects.none()
+        return Wishlist.objects.filter(session_key=session_key).select_related('product')
 
 
-@login_required
 @require_POST
 def wishlist_toggle_ajax(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    wishlist_item = Wishlist.objects.filter(user=request.user, product=product)
     
-    if wishlist_item.exists():
-        wishlist_item.delete()
-        is_wishlisted = False
+    if request.user.is_authenticated:
+        wishlist_item = Wishlist.objects.filter(user=request.user, product=product)
+        if wishlist_item.exists():
+            wishlist_item.delete()
+            is_wishlisted = False
+        else:
+            Wishlist.objects.create(user=request.user, product=product)
+            is_wishlisted = True
     else:
-        Wishlist.objects.create(user=request.user, product=product)
-        is_wishlisted = True
+        if not request.session.session_key:
+            request.session.create()
+        session_key = request.session.session_key
+        wishlist_item = Wishlist.objects.filter(session_key=session_key, product=product)
+        if wishlist_item.exists():
+            wishlist_item.delete()
+            is_wishlisted = False
+        else:
+            Wishlist.objects.create(session_key=session_key, product=product)
+            is_wishlisted = True
 
     if request.headers.get('HX-Request') == 'true':
         context = {

@@ -30,6 +30,10 @@
             <span class="text-customText-gray">Total Paid</span>
             <span class="font-extrabold text-brand text-base">₹{{ order.total_amount }}</span>
         </div>
+        <div class="flex justify-between items-center text-sm border-t border-surface-border/30 pt-3">
+            <span class="text-customText-gray">Estimated Delivery</span>
+            <span class="font-extrabold text-emerald-400 text-sm">🚚 {{ order.delivery_estimate }}</span>
+        </div>
         <div class="flex justify-between items-start text-sm border-t border-surface-border/30 pt-3">
             <span class="text-customText-gray">Shipping Address</span>
             <span class="font-bold text-customText-white text-right max-w-xs leading-relaxed">
