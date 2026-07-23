@@ -629,16 +629,27 @@
 
     <!-- Django Flash Messages Listener -->
     {% if messages %}
+        <script id="django-messages" type="application/json">
+            [
+                {% for message in messages %}
+                    {
+                        "title": "ITEM ADDED TO CART 🛍️",
+                        "message": "{{ message|escapejs }}"
+                    }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]
+        </script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                {% for message in messages %}
-                    window.dispatchEvent(new CustomEvent('show-toast', { 
-                        detail: { 
-                            title: "ITEM ADDED TO CART 🛍️", 
-                            message: "{{ message|escapejs }}" 
-                        } 
-                    }));
-                {% endfor %}
+                try {
+                    var msgElem = document.getElementById('django-messages');
+                    if (msgElem && msgElem.textContent) {
+                        var msgs = JSON.parse(msgElem.textContent);
+                        msgs.forEach(function(m) {
+                            window.dispatchEvent(new CustomEvent('show-toast', { detail: m }));
+                        });
+                    }
+                } catch (e) {}
             });
         </script>
     {% endif %}
