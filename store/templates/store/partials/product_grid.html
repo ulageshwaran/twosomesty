@@ -31,7 +31,7 @@
                     <div class="p-4 sm:p-6 flex flex-col flex-grow justify-between">
                         <div>
                             <div class="flex items-center justify-between">
-                                <span class="text-[10px] text-customText-gray font-bold tracking-wider uppercase">{{ product.brand|default:"Twosomesty" }}</span>
+                                <span class="text-[10px] text-customText-gray font-bold tracking-wider uppercase">{{ product.category.name }}</span>
                                 {% include "store/partials/wishlist_button.html" with product=product %}
                             </div>
                             <a href="{% url 'store:product_detail' product.slug %}" class="block mt-1 font-bold text-customText-white hover:text-brand transition text-sm leading-snug">
