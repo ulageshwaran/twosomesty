@@ -82,8 +82,8 @@
         this.resetTimer();
     }
 }" x-init="init()">
-    <!-- Slides Container -->
-    <div class="relative h-[400px] sm:h-[650px] md:h-[650px] overflow-hidden"
+    <!-- Slides Container (Occupies 3/4 screen height on laptops) -->
+    <div class="relative h-[380px] sm:h-[450px] md:h-[490px] lg:h-[520px] xl:h-[560px] overflow-hidden"
          @touchstart="touchStartX = $event.touches[0].clientX"
          @touchend="if (touchStartX - $event.changedTouches[0].clientX > 50) next(); if ($event.changedTouches[0].clientX - touchStartX > 50) prev();">
         <template x-for="(slide, index) in slides" :key="index">
