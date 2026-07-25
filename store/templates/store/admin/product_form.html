@@ -23,8 +23,22 @@
         <form method="post" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
 
-            <!-- Image Upload Section (First Step) -->
-            <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4">
+            <!-- Image Upload Section (First Step with Live Preview) -->
+            <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4"
+                 x-data="{ previews: [], handleFileSelect(e) {
+                    this.previews = [];
+                    const files = e.target.files;
+                    if (!files || files.length === 0) return;
+                    Array.from(files).forEach(file => {
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                                this.previews.push({ name: file.name, url: event.target.result, size: (file.size / 1024).toFixed(0) });
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                 }}">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1">
                         📸 Product Photos (Upload Multiple Images)
@@ -32,7 +46,29 @@
                     <p class="text-xs text-slate-500 mb-3">Select one or more high quality images (PNG, JPG, WebP) for this product.</p>
                     
                     <input type="file" name="images" multiple accept="image/*"
+                           @change="handleFileSelect($event)"
                            class="w-full text-xs text-slate-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand file:text-white hover:file:bg-brand-hover cursor-pointer">
+                </div>
+
+                <!-- Live Selected New Images Preview -->
+                <div x-show="previews.length > 0" class="border-t border-slate-200 pt-4" x-cloak>
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-emerald-700">
+                            ✨ Selected New Photos Preview (<span x-text="previews.length"></span> File<span x-text="previews.length > 1 ? 's' : ''"></span> Ready To Upload)
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <template x-for="(item, index) in previews" :key="index">
+                            <div class="relative bg-white border border-emerald-300 p-2 rounded-xl text-center space-y-2 shadow-xs group">
+                                <span class="absolute top-1 right-1 bg-emerald-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full shadow">New</span>
+                                <img :src="item.url" :alt="item.name" class="w-full h-24 object-cover rounded-lg">
+                                <div class="px-1">
+                                    <p class="text-[11px] font-bold text-slate-800 truncate" x-text="item.name"></p>
+                                    <p class="text-[10px] text-slate-500" x-text="item.size + ' KB'"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
                 <!-- Existing Images Preview (if editing) -->
