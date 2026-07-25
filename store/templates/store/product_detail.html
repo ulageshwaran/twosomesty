@@ -532,9 +532,16 @@
                                     {{ related.name }}
                                 </a>
                             </div>
-                            <div class="mt-4 flex items-baseline justify-between border-t border-surface-border/50 pt-4">
-                                <span class="text-base font-extrabold text-customText-white">₹{{ related.base_price }}</span>
-                                <a href="{% url 'store:product_detail' related.slug %}" class="w-8 h-8 rounded-full bg-surface-slate border border-surface-border flex items-center justify-center text-customText-white hover:bg-brand hover:border-brand transition">
+                            <div class="mt-4 flex items-center justify-between border-t border-surface-border/50 pt-4 gap-2">
+                                {% if related.discount_price %}
+                                    <div class="flex flex-wrap items-baseline gap-1.5 min-w-0">
+                                        <span class="text-sm sm:text-base font-extrabold text-brand truncate">₹{{ related.discount_price|floatformat:0 }}</span>
+                                        <span class="text-xxs sm:text-xs text-customText-gray line-through truncate">₹{{ related.base_price|floatformat:0 }}</span>
+                                    </div>
+                                {% else %}
+                                    <span class="text-sm sm:text-base font-extrabold text-customText-white truncate">₹{{ related.base_price|floatformat:0 }}</span>
+                                {% endif %}
+                                <a href="{% url 'store:product_detail' related.slug %}" class="w-8 h-8 rounded-full bg-surface-slate border border-surface-border flex items-center justify-center text-customText-white hover:bg-brand hover:border-brand transition flex-shrink-0">
                                     &rarr;
                                 </a>
                             </div>
