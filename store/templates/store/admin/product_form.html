@@ -23,6 +23,37 @@
         <form method="post" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
 
+            <!-- Image Upload Section (First Step) -->
+            <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1">
+                        📸 Product Photos (Upload Multiple Images)
+                    </label>
+                    <p class="text-xs text-slate-500 mb-3">Select one or more high quality images (PNG, JPG, WebP) for this product.</p>
+                    
+                    <input type="file" name="images" multiple accept="image/*"
+                           class="w-full text-xs text-slate-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand file:text-white hover:file:bg-brand-hover cursor-pointer">
+                </div>
+
+                <!-- Existing Images Preview (if editing) -->
+                {% if object and object.images.all %}
+                    <div class="border-t border-slate-200 pt-4">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-3">Current Uploaded Photos (Check to Delete)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {% for img in object.images.all %}
+                                <div class="relative group bg-white border border-slate-200 p-2 rounded-xl text-center space-y-2 shadow-xs">
+                                    <img src="{{ img.image.url }}" alt="Product Image" class="w-full h-24 object-cover rounded-lg">
+                                    <div class="flex items-center justify-center gap-1.5 text-xs text-red-600">
+                                        <input type="checkbox" name="delete_images" value="{{ img.id }}" id="del_img_{{ img.id }}" class="accent-brand">
+                                        <label for="del_img_{{ img.id }}" class="cursor-pointer text-[11px] font-semibold">Delete</label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
             <!-- Product Title -->
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Product Name</label>
@@ -72,37 +103,6 @@
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Product Description</label>
                 <textarea name="description" rows="4" required placeholder="Detailed product specifications, fit guide, and features..."
                           class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand text-sm transition">{{ form.description.value|default:'' }}</textarea>
-            </div>
-
-            <!-- Image Upload Section -->
-            <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4">
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-900 mb-1">
-                        📸 Product Photos (Upload Multiple Images)
-                    </label>
-                    <p class="text-xs text-slate-500 mb-3">Select one or more high quality images (PNG, JPG, WebP) for this product.</p>
-                    
-                    <input type="file" name="images" multiple accept="image/*"
-                           class="w-full text-xs text-slate-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand file:text-white hover:file:bg-brand-hover cursor-pointer">
-                </div>
-
-                <!-- Existing Images Preview (if editing) -->
-                {% if object and object.images.all %}
-                    <div class="border-t border-slate-200 pt-4">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-3">Current Uploaded Photos (Check to Delete)</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            {% for img in object.images.all %}
-                                <div class="relative group bg-white border border-slate-200 p-2 rounded-xl text-center space-y-2 shadow-xs">
-                                    <img src="{{ img.image.url }}" alt="Product Image" class="w-full h-24 object-cover rounded-lg">
-                                    <div class="flex items-center justify-center gap-1.5 text-xs text-red-600">
-                                        <input type="checkbox" name="delete_images" value="{{ img.id }}" id="del_img_{{ img.id }}" class="accent-brand">
-                                        <label for="del_img_{{ img.id }}" class="cursor-pointer text-[11px] font-semibold">Delete</label>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endif %}
             </div>
 
             <!-- Fabric & Weight Specs -->
