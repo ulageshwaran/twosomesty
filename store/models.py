@@ -45,6 +45,8 @@ class Category(models.Model):
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subcategories')
     image = models.ImageField(upload_to='categories/', blank=True, null=True)
     
+    order = models.PositiveIntegerField(default=0, help_text="Display ordering position")
+
     # Local SEO targeting Chennai / Tamil Nadu
     meta_title = models.CharField(max_length=150, blank=True, null=True)
     meta_description = models.TextField(max_length=250, blank=True, null=True)
@@ -104,6 +106,7 @@ class Category(models.Model):
 
     class Meta:
         verbose_name_plural = "Categories"
+        ordering = ['order', 'id']
 
 
 # 4. Product Model

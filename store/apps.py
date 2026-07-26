@@ -30,6 +30,10 @@ class StoreConfig(AppConfig):
                 except Exception:
                     pass
                 try:
+                    cursor.execute('ALTER TABLE store_category ADD COLUMN "order" integer NOT NULL DEFAULT 0;')
+                except Exception:
+                    pass
+                try:
                     cursor.execute("ALTER TABLE store_product ADD COLUMN is_new_arrival bool NOT NULL DEFAULT 1;")
                 except Exception:
                     pass

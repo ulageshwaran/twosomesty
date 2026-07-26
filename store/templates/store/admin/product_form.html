@@ -74,12 +74,29 @@
                 <!-- Existing Images Preview (if editing) -->
                 {% if object and object.images.all %}
                     <div class="border-t border-slate-200 pt-4">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-3">Current Uploaded Photos (Check to Delete)</label>
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                                Current Uploaded Photos (Set Position Order / Check to Delete)
+                            </label>
+                            <span class="text-[11px] text-slate-500 font-medium">Position 0 (or first photo) is the main product cover photo</span>
+                        </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             {% for img in object.images.all %}
                                 <div class="relative group bg-white border border-slate-200 p-2 rounded-xl text-center space-y-2 shadow-xs">
+                                    {% if forloop.first %}
+                                        <span class="absolute top-1.5 left-1.5 bg-brand text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow z-10">⭐ Cover</span>
+                                    {% endif %}
                                     <img src="{{ img.image.url }}" alt="Product Image" class="w-full h-24 object-cover rounded-lg">
-                                    <div class="flex items-center justify-center gap-1.5 text-xs text-red-600">
+                                    
+                                    <!-- Order Position Input -->
+                                    <div class="flex items-center justify-center gap-1.5 pt-1">
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase">Pos:</span>
+                                        <input type="number" name="image_order_{{ img.id }}" value="{{ img.order }}" min="0"
+                                               class="w-12 px-1.5 py-0.5 bg-slate-50 border border-slate-300 rounded text-center text-xs font-bold text-slate-800 focus:border-brand focus:outline-none">
+                                    </div>
+
+                                    <!-- Delete Checkbox -->
+                                    <div class="flex items-center justify-center gap-1.5 text-xs text-red-600 border-t border-slate-100 pt-1.5">
                                         <input type="checkbox" name="delete_images" value="{{ img.id }}" id="del_img_{{ img.id }}" class="accent-brand">
                                         <label for="del_img_{{ img.id }}" class="cursor-pointer text-[11px] font-semibold">Delete</label>
                                     </div>

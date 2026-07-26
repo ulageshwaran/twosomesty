@@ -165,10 +165,19 @@ class AdminProductUpdateView(StaffRequiredMixin, UpdateView):
             for idx, img in enumerate(images):
                 ProductImage.objects.create(product=product, image=img, order=start_order + idx)
 
-        # 2. Handle image deletions if checked
+        # 2. Handle image deletions & position reordering if updated
         delete_image_ids = self.request.POST.getlist('delete_images')
         if delete_image_ids:
             ProductImage.objects.filter(id__in=delete_image_ids, product=product).delete()
+
+        for img in product.images.all():
+            img_order_key = f"image_order_{img.id}"
+            if img_order_key in self.request.POST:
+                try:
+                    img.order = int(self.request.POST.get(img_order_key))
+                    img.save(update_fields=['order'])
+                except ValueError:
+                    pass
 
         # 3. Handle adding a new variant (only if size, color, and stock are provided)
         new_size = self.request.POST.get('new_size', '').strip()
@@ -304,7 +313,7 @@ class AdminCategoryListView(StaffRequiredMixin, View):
         editing_category = None
         if edit_id:
             editing_category = Category.objects.filter(id=edit_id).first()
-        categories = Category.objects.all()
+        categories = Category.objects.all().order_by('order', 'id')
         return render(request, 'store/admin/category_list.html', {
             'categories': categories,
             'editing_category': editing_category,
@@ -313,6 +322,35 @@ class AdminCategoryListView(StaffRequiredMixin, View):
     def post(self, request):
         category_id = request.POST.get('category_id')
         action = request.POST.get('action')
+
+        if action == 'reorder' and category_id:
+            direction = request.POST.get('direction')
+            cat = get_object_or_404(Category, id=category_id)
+            all_cats = list(Category.objects.all().order_by('order', 'id'))
+            
+            for idx, c in enumerate(all_cats):
+                if c.order != idx:
+                    c.order = idx
+                    c.save(update_fields=['order'])
+            
+            idx = next((i for i, c in enumerate(all_cats) if c.id == cat.id), None)
+            if idx is not None:
+                if direction == 'up' and idx > 0:
+                    prev_cat = all_cats[idx - 1]
+                    cat.order, prev_cat.order = prev_cat.order, cat.order
+                    cat.save(update_fields=['order'])
+                    prev_cat.save(update_fields=['order'])
+                    messages.success(request, f"Moved category '{cat.name}' up!")
+                elif direction == 'down' and idx < len(all_cats) - 1:
+                    next_cat = all_cats[idx + 1]
+                    cat.order, next_cat.order = next_cat.order, cat.order
+                    cat.save(update_fields=['order'])
+                    next_cat.save(update_fields=['order'])
+                    messages.success(request, f"Moved category '{cat.name}' down!")
+            
+            from django.core.cache import cache
+            cache.delete('nav_categories')
+            return redirect('store:admin_categories')
 
         if action == 'delete' and category_id:
             cat = get_object_or_404(Category, id=category_id)
@@ -323,7 +361,13 @@ class AdminCategoryListView(StaffRequiredMixin, View):
 
         name = request.POST.get('name', '').strip()
         parent_id = request.POST.get('parent')
+        order_val = request.POST.get('order', '0')
         image = request.FILES.get('image')
+
+        try:
+            order = int(order_val)
+        except ValueError:
+            order = 0
 
         parent = None
         if parent_id:
@@ -333,12 +377,13 @@ class AdminCategoryListView(StaffRequiredMixin, View):
             cat = get_object_or_404(Category, id=category_id)
             cat.name = name
             cat.parent = parent
+            cat.order = order
             if image:
                 cat.image = image
             cat.save()
             messages.success(request, f"Category '{name}' updated successfully!")
         elif name:
-            Category.objects.create(name=name, parent=parent, image=image)
+            Category.objects.create(name=name, parent=parent, order=order, image=image)
             messages.success(request, f"Category '{name}' created successfully!")
         return redirect('store:admin_categories')
 
