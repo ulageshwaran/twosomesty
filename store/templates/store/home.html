@@ -187,7 +187,7 @@
                 <div
                     class="relative overflow-hidden border border-surface-border h-72 sm:h-80 group-hover:border-brand transition duration-500">
                     {% if cat.image %}
-                    <img src="{{ cat.image|cloudinary_optimize:'w_800,q_90' }}" alt="{{ cat.name }}" loading="lazy" decoding="async"
+                    <img src="{{ cat.image|cloudinary_optimize:'w_400' }}" alt="{{ cat.name }}" loading="lazy" decoding="async"
                         class="object-cover w-full h-full group-hover:scale-110 transition duration-700">
                     {% else %}
                     <div class="w-full h-full bg-surface-slate flex items-center justify-center text-4xl">📦</div>
@@ -221,7 +221,17 @@
                 class="block relative aspect-square bg-surface-slate overflow-hidden">
                 <!-- If there's an image, render it, else show placeholder -->
                 {% if product.images.first %}
-                <img src="{{ product.images.first.image|cloudinary_optimize:'w_1200,q_90' }}" alt="{{ product.name }}" loading="lazy" decoding="async"
+                <img
+                  src="{{ product.images.first.image|cloudinary_optimize:'w_600' }}"
+                  srcset="
+                    {{ product.images.first.image|cloudinary_optimize:'w_300' }} 300w,
+                    {{ product.images.first.image|cloudinary_optimize:'w_600' }} 600w,
+                    {{ product.images.first.image|cloudinary_optimize:'w_900' }} 900w
+                  "
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 300px"
+                  alt="{{ product.name }}"
+                  loading="lazy"
+                  decoding="async"
                     class="object-cover w-full h-full group-hover:scale-105 transition duration-500">
                 {% else %}
                 <div

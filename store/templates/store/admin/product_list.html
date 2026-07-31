@@ -1,4 +1,5 @@
 {% extends "store/admin/admin_base.html" %}
+{% load cloudinary_tags %}
 
 {% block title %}Products & Stock | Twosomesty Admin{% endblock %}
 
@@ -37,7 +38,7 @@
                             <td class="p-3">
                                 <div class="flex items-center gap-3">
                                     {% if product.images.first %}
-                                        <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="w-12 h-12 rounded-xl object-cover border border-slate-200">
+                                        <img src="{{ product.images.first.image|cloudinary_optimize:'w_150' }}" alt="{{ product.name }}" loading="lazy" decoding="async" class="w-12 h-12 rounded-xl object-cover border border-slate-200">
                                     {% else %}
                                         <div class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-xs text-slate-400">No Img</div>
                                     {% endif %}

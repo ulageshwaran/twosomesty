@@ -26,7 +26,16 @@
                         <!-- Product Image Link -->
                         <a href="{% url 'store:product_detail' product.slug %}" class="block aspect-h-1 aspect-w-1 relative bg-surface-slate overflow-hidden group-hover:scale-95 transition-transform duration-500 h-72">
                             {% if product.images.first %}
-                                <img src="{{ product.images.first.image|cloudinary_optimize:'w_500' }}" alt="{{ product.images.first.alt_text|default:product.name }}" loading="lazy" decoding="async" class="object-cover w-full h-full transform group-hover:scale-110 transition duration-700">
+                                <img
+                                  src="{{ product.images.first.image|cloudinary_optimize:'w_600' }}"
+                                  srcset="
+                                    {{ product.images.first.image|cloudinary_optimize:'w_300' }} 300w,
+                                    {{ product.images.first.image|cloudinary_optimize:'w_600' }} 600w
+                                  "
+                                  sizes="(max-width: 640px) 100vw, 300px"
+                                  alt="{{ product.images.first.alt_text|default:product.name }}"
+                                  loading="lazy" decoding="async"
+                                  class="object-cover w-full h-full transform group-hover:scale-110 transition duration-700">
                             {% else %}
                                 <div class="w-full h-full flex items-center justify-center text-xs text-customText-gray bg-surface-slate">No Image</div>
                             {% endif %}

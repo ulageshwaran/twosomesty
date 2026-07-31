@@ -1,3 +1,4 @@
+{% load cloudinary_tags %}
 <!-- Out-of-band Swap for Cart Badge -->
 <span id="cart-badge" hx-swap-oob="true" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xxs font-extrabold leading-none text-customText-white bg-brand rounded-full">
     {{ cart_count }}
@@ -18,7 +19,7 @@
                     <div class="flex items-center gap-6">
                         <div class="w-20 h-20 bg-surface-slate border border-surface-border rounded-2xl overflow-hidden flex-shrink-0">
                             {% if item.variant.product.images.first %}
-                                <img src="{{ item.variant.product.images.first.image.url }}" alt="{{ item.variant.product.name }}" class="object-cover w-full h-full">
+                                <img src="{{ item.variant.product.images.first.image|cloudinary_optimize:'w_150' }}" alt="{{ item.variant.product.name }}" loading="lazy" decoding="async" class="object-cover w-full h-full">
                             {% else %}
                                 <div class="w-full h-full flex items-center justify-center text-xs text-customText-gray bg-surface-slate">No Image</div>
                             {% endif %}

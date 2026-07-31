@@ -130,8 +130,8 @@
                             <a href="{% url 'store:product_detail' review.product.slug %}" target="_blank"
                                class="flex items-center gap-2.5 group hover:text-brand transition">
                                 {% if review.product.images.first %}
-                                <img src="{{ review.product.images.first.image|cloudinary_optimize:'w_200,q_90' }}" 
-                                     alt="{{ review.product.name }}" class="w-10 h-10 rounded-xl object-cover border border-slate-200">
+                                <img src="{{ review.product.images.first.image|cloudinary_optimize:'w_150' }}" 
+                                     alt="{{ review.product.name }}" loading="lazy" decoding="async" class="w-10 h-10 rounded-xl object-cover border border-slate-200">
                                 {% else %}
                                 <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xs text-slate-400">📦</div>
                                 {% endif %}

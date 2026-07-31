@@ -1,4 +1,5 @@
 {% extends "store/base.html" %}
+{% load cloudinary_tags %}
 
 {% block title %}Checkout | Twosomesty{% endblock %}
 
@@ -235,7 +236,7 @@
                             <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
                                 <div class="w-12 h-12 bg-surface-slate border border-surface-border rounded-xl overflow-hidden flex-shrink-0">
                                     {% if item.variant.product.images.first %}
-                                        <img src="{{ item.variant.product.images.first.image.url }}" alt="{{ item.variant.product.name }}" class="object-cover w-full h-full">
+                                        <img src="{{ item.variant.product.images.first.image|cloudinary_optimize:'w_150' }}" alt="{{ item.variant.product.name }}" loading="lazy" decoding="async" class="object-cover w-full h-full">
                                     {% else %}
                                         <div class="w-full h-full flex items-center justify-center text-[10px] text-customText-gray bg-surface-slate">No Image</div>
                                     {% endif %}

@@ -170,16 +170,18 @@ class Product(models.Model):
 
     @property
     def primary_image_url(self):
+        """800px wide — used in product detail main viewer."""
         first_img = self.images.first()
         if first_img:
-            return first_img.get_optimized_url(width=1400, quality="90")
+            return first_img.get_optimized_url(width=800, quality="auto")
         return ''
 
     @property
     def primary_thumbnail_url(self):
+        """300px — used in grid/card contexts."""
         first_img = self.images.first()
         if first_img:
-            return first_img.get_optimized_url(width=800, quality="90")
+            return first_img.get_optimized_url(width=300, quality="auto")
         return ''
 
 
@@ -196,7 +198,11 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"Image for {self.product.name}"
 
-    def get_optimized_url(self, width=1400, height=None, crop="limit", quality="90", fetch_format="auto"):
+    def get_optimized_url(self, width=None, height=None, crop="limit", quality="auto", fetch_format="auto"):
+        """
+        Build a Cloudinary transformation URL.
+        Defaults: q_auto, f_auto — Cloudinary picks the best quality/format automatically.
+        """
         if not self.image:
             return ''
         url = self.image.url
@@ -214,11 +220,13 @@ class ProductImage(models.Model):
 
     @property
     def optimized_url(self):
-        return self.get_optimized_url(width=1600, quality="90")
+        """Full-width product detail image (800px, q_auto)."""
+        return self.get_optimized_url(width=800, quality="auto")
 
     @property
     def thumbnail_url(self):
-        return self.get_optimized_url(width=800, quality="90")
+        """Grid/thumbnail context (150px, q_auto)."""
+        return self.get_optimized_url(width=150, quality="auto")
 
 
 # 6. ProductVariant Model
