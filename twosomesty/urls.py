@@ -30,7 +30,6 @@ sitemaps = {
 urlpatterns = [
     path('twosomeadmin/', admin.site.urls),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
-    path("silk/", include("silk.urls", namespace="silk")),
     path('accounts/google/', include('allauth.socialaccount.providers.google.urls')),
     path('accounts/3rdparty/', include('allauth.socialaccount.urls')),
     path('', include('store.urls')),

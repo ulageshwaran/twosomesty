@@ -72,7 +72,6 @@ INSTALLED_APPS = [
     'rest_framework',
     # Local apps
     'store.apps.StoreConfig',
-    "silk",
     'django.contrib.sites',  
     'allauth',
     'allauth.account',
@@ -89,7 +88,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "silk.middleware.SilkyMiddleware",
     'allauth.account.middleware.AccountMiddleware',
 ]
 
