@@ -24,7 +24,7 @@
                         </div>
 
                         <!-- Product Image Link -->
-                        <a href="{% url 'store:product_detail' product.slug %}" class="block relative aspect-[3/4] bg-surface-slate overflow-hidden group-hover:scale-95 transition-transform duration-500">
+                        <a href="{% url 'store:product_detail' product.slug %}" class="block relative aspect-[4/5] bg-surface-slate overflow-hidden group-hover:scale-95 transition-transform duration-500">
                             {% if product.images.first %}
                                 <img
                                   src="{{ product.images.first.image|cloudinary_optimize:'w_600' }}"
