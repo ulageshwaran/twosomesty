@@ -518,7 +518,7 @@
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {% for related in related_products %}
                     <div class="group relative flex flex-col justify-between bg-surface-card border border-surface-border overflow-hidden hover:border-brand/50 transition duration-500">
-                        <a href="{% url 'store:product_detail' related.slug %}" class="block relative aspect-square bg-surface-slate overflow-hidden">
+                        <a href="{% url 'store:product_detail' related.slug %}" class="block relative aspect-[3/4] bg-surface-slate overflow-hidden">
                             {% if related.images.first %}
                                 <img src="{{ related.images.first.image.url }}" alt="{{ related.name }}" class="object-cover w-full h-full group-hover:scale-105 transition duration-500">
                             {% else %}
