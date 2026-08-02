@@ -95,7 +95,7 @@ class AdminProductListView(StaffRequiredMixin, ListView):
 class AdminProductCreateView(StaffRequiredMixin, CreateView):
     model = Product
     template_name = 'store/admin/product_form.html'
-    fields = ['name', 'category', 'base_price', 'discount_price', 'description', 'brand', 'fabric', 'weight', 'is_active']
+    fields = ['name', 'category', 'base_price', 'discount_price', 'description', 'brand', 'fabric', 'weight', 'is_active', 'is_new_arrival']
 
     def get_success_url(self):
         return reverse('store:admin_product_edit', kwargs={'pk': self.object.id})
@@ -143,7 +143,7 @@ class AdminProductCreateView(StaffRequiredMixin, CreateView):
 class AdminProductUpdateView(StaffRequiredMixin, UpdateView):
     model = Product
     template_name = 'store/admin/product_form.html'
-    fields = ['name', 'category', 'base_price', 'discount_price', 'description', 'brand', 'fabric', 'weight', 'is_active']
+    fields = ['name', 'category', 'base_price', 'discount_price', 'description', 'brand', 'fabric', 'weight', 'is_active', 'is_new_arrival']
 
     def get_success_url(self):
         return reverse('store:admin_product_edit', kwargs={'pk': self.object.pk})

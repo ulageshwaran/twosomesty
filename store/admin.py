@@ -57,8 +57,8 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'base_price', 'discount_price', 'is_active', 'created_at')
-    list_filter = ('is_active', 'category', 'created_at')
+    list_display = ('name', 'category', 'base_price', 'discount_price', 'is_active', 'is_new_arrival', 'created_at')
+    list_filter = ('is_active', 'is_new_arrival', 'category', 'created_at')
     search_fields = ('name', 'brand', 'slug', 'variants__sku')
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ProductImageInline, ProductVariantInline]
