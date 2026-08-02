@@ -42,7 +42,7 @@
         @keydown.window.right="if (lightboxOpen) nextImage()">
             
             <!-- Main Image Frame with Swipe Support and Navigation Arrows -->
-            <div class="aspect-square bg-surface-card border border-surface-border overflow-hidden relative group"
+            <div class="aspect-[3/4] bg-surface-card border border-surface-border overflow-hidden relative group"
                  @touchstart="touchStartX = $event.touches[0].clientX"
                  @touchend="if ($event.changedTouches[0].clientX - touchStartX > 50) prevImage(); else if (touchStartX - $event.changedTouches[0].clientX > 50) nextImage();">
                 
@@ -88,7 +88,7 @@
                     {% for img in product.images.all %}
                         <button type="button"
                                 @click="activeIndex = {{ forloop.index0 }}" 
-                                class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-surface-card border border-surface-border overflow-hidden hover:border-brand focus:outline-none transition-all duration-300 cursor-pointer"
+                                class="w-16 h-20 sm:w-20 sm:h-24 flex-shrink-0 bg-surface-card border border-surface-border overflow-hidden hover:border-brand focus:outline-none transition-all duration-300 cursor-pointer"
                                 :class="{ 'border-brand ring-2 ring-brand/20': activeIndex === {{ forloop.index0 }} }">
                             <img src="{{ img.thumbnail_url }}" alt="Thumbnail" loading="lazy" decoding="async" class="object-cover w-full h-full">
                         </button>
@@ -145,7 +145,7 @@
                         <template x-for="(img, idx) in images" :key="idx">
                             <button type="button"
                                     @click="activeIndex = idx" 
-                                    class="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 bg-neutral-900 border rounded-lg overflow-hidden transition cursor-pointer"
+                                    class="w-14 h-18 sm:w-16 sm:h-20 flex-shrink-0 bg-neutral-900 border rounded-lg overflow-hidden transition cursor-pointer"
                                     :class="activeIndex === idx ? 'border-brand ring-2 ring-brand' : 'border-neutral-700 opacity-60 hover:opacity-100'">
                                 <img :src="img" alt="Thumbnail" class="object-cover w-full h-full">
                             </button>
