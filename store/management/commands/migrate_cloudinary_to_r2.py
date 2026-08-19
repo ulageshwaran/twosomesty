@@ -34,6 +34,11 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.management.base import BaseCommand
 
+# pyrefly: ignore [missing-import]
+import cloudinary
+# pyrefly: ignore [missing-import]
+import cloudinary.utils
+
 
 LOG_FILE = os.path.join(settings.BASE_DIR, 'cloudinary_migration.log')
 
@@ -46,6 +51,15 @@ logging.basicConfig(
     ],
 )
 log = logging.getLogger('cloudinary_migration')
+
+
+def get_cloudinary_url(public_id: str) -> str:
+    """Reconstruct the original Cloudinary delivery URL from a stored public_id,
+    independent of whatever storage backend default_storage currently points at."""
+    if not public_id:
+        return ''
+    url, _ = cloudinary.utils.cloudinary_url(public_id)
+    return url
 
 
 def is_cloudinary_url(url: str) -> bool:
@@ -139,11 +153,18 @@ class Command(BaseCommand):
                     if not field or not field.name:
                         continue
 
-                    # Get current URL
+                    # Reconstruct the ORIGINAL Cloudinary URL from the stored
+                    # public_id/name — do NOT use field.url, since default_storage
+                    # is already pointed at R2 and would build the wrong URL.
                     try:
-                        current_url = field.url
+                        current_url = get_cloudinary_url(field.name)
                     except Exception as e:
-                        log.warning(f'  [{model_name} pk={instance.pk}] {field_name}: cannot get URL — {e}')
+                        log.warning(f'  [{model_name} pk={instance.pk}] {field_name}: cannot build Cloudinary URL — {e}')
+                        stats['failed'] += 1
+                        continue
+
+                    if not current_url:
+                        log.warning(f'  [{model_name} pk={instance.pk}] {field_name}: empty name, skipping')
                         stats['failed'] += 1
                         continue
 
