@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
+import io
+import os
 
 # 1. Profile Model
 class Profile(models.Model):
@@ -170,25 +172,24 @@ class Product(models.Model):
 
     @property
     def primary_image_url(self):
-        """800px wide — used in product detail main viewer."""
+        """Full/detail image URL for the first product image."""
         first_img = self.images.first()
-        if first_img:
-            return first_img.get_optimized_url(width=800, quality="auto")
-        return ''
+        return first_img.optimized_url if first_img else ''
 
     @property
     def primary_thumbnail_url(self):
-        """300px — used in grid/card contexts."""
+        """Pre-generated 300px thumbnail for grid/card contexts."""
         first_img = self.images.first()
-        if first_img:
-            return first_img.get_optimized_url(width=300, quality="auto")
-        return ''
+        return first_img.thumbnail_url if first_img else ''
 
 
 # 5. ProductImage Model
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='products/')
+    image = models.ImageField(upload_to='products/')          # Original / detail size (≤800px wide)
+    thumbnail = models.ImageField(                            # Auto-generated 300px thumbnail
+        upload_to='products/thumbs/', blank=True, null=True
+    )
     alt_text = models.CharField(max_length=255, blank=True, null=True)
     order = models.PositiveIntegerField(default=0)
 
@@ -198,35 +199,84 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"Image for {self.product.name}"
 
+    # ------------------------------------------------------------------
+    # Pillow thumbnail generation
+    # ------------------------------------------------------------------
+    def _generate_thumbnail(self, max_size=(300, 300)):
+        """Return an in-memory BytesIO of the image resized to fit within max_size."""
+        from PIL import Image
+        img_field = self.image
+        img_field.open()
+        img = Image.open(img_field)
+        img = img.convert('RGB')  # ensure no alpha channel issues
+        img.thumbnail(max_size, Image.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format='WEBP', quality=82, optimize=True)
+        buf.seek(0)
+        return buf
+
+    def save(self, *args, **kwargs):
+        """
+        On first save (new image uploaded), auto-generate a WebP thumbnail.
+        Regenerates if the image field has changed (detected by comparing names).
+        """
+        from django.core.files.base import ContentFile
+
+        # Check whether this is a new upload or a changed image
+        old_image_name = None
+        if self.pk:
+            try:
+                old_image_name = ProductImage.objects.get(pk=self.pk).image.name
+            except ProductImage.DoesNotExist:
+                pass
+
+        image_changed = (old_image_name != self.image.name) if old_image_name else bool(self.image)
+
+        # Save the main record first so the image file exists in storage
+        super().save(*args, **kwargs)
+
+        # Generate thumbnail only when image has changed
+        if self.image and image_changed:
+            try:
+                buf = self._generate_thumbnail()
+                base = os.path.splitext(os.path.basename(self.image.name))[0]
+                thumb_name = f"{base}_thumb.webp"
+                # Save thumbnail field — triggers another DB save (update only)
+                self.thumbnail.save(thumb_name, ContentFile(buf.read()), save=True)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(
+                    f"Thumbnail generation failed for ProductImage pk={self.pk}: {e}"
+                )
+
+    # ------------------------------------------------------------------
+    # URL helpers (storage-backend agnostic)
+    # ------------------------------------------------------------------
     def get_optimized_url(self, width=None, height=None, crop="limit", quality="auto", fetch_format="auto"):
         """
-        Build a Cloudinary transformation URL.
-        Defaults: q_auto, f_auto — Cloudinary picks the best quality/format automatically.
+        Returns the image URL. Previously injected Cloudinary transforms;
+        now returns the raw URL from whatever storage backend is active.
+        For Cloudflare R2, image resizing is handled by pre-generated thumbnails
+        or Cloudflare Image Resizing (if enabled on your zone).
         """
         if not self.image:
             return ''
-        url = self.image.url
-        if 'res.cloudinary.com' in url and '/upload/' in url:
-            params = [f"f_{fetch_format}", f"q_{quality}"]
-            if width:
-                params.append(f"w_{width}")
-            if height:
-                params.append(f"h_{height}")
-            if crop:
-                params.append(f"c_{crop}")
-            param_str = ','.join(params)
-            return url.replace('/upload/', f'/upload/{param_str}/')
-        return url
+        return self.image.url
 
     @property
     def optimized_url(self):
-        """Full-width product detail image (800px, q_auto)."""
-        return self.get_optimized_url(width=800, quality="auto")
+        """Full/detail image URL — served directly from R2."""
+        return self.image.url if self.image else ''
 
     @property
     def thumbnail_url(self):
-        """Grid/thumbnail context (150px, q_auto)."""
-        return self.get_optimized_url(width=150, quality="auto")
+        """
+        Pre-generated 300px WebP thumbnail URL.
+        Falls back to full image if thumbnail hasn't been generated yet.
+        """
+        if self.thumbnail:
+            return self.thumbnail.url
+        return self.image.url if self.image else ''
 
 
 # 6. ProductVariant Model

@@ -54,23 +54,16 @@ def wishlist_processor(request):
 
 def logo_processor(request):
     """
-    Passes Cloudinary URLs for logo images to all templates with local static fallback.
+    Passes logo image URLs to all templates.
+    Logos are served from Django's static file system.
+    Place files at:
+      - static/images/brand_logo.png
+      - static/images/logo_footer.png
     """
-    # pyrefly: ignore [missing-import]
-    import cloudinary.utils
-    try:
-        # Generate optimized, secure Cloudinary URLs
-        brand_logo_url = cloudinary.utils.cloudinary_url("brand_logo", secure=True)[0]
-        logo_footer_url = cloudinary.utils.cloudinary_url("logo_footer", secure=True)[0]
-    except Exception:
-        # Fallback to local static paths if error occurs
-        from django.templatetags.static import static
-        brand_logo_url = static("images/brand_logo.PNG")
-        logo_footer_url = static("images/logo_footer.png")
-        
+    from django.templatetags.static import static
     return {
-        'brand_logo_url': brand_logo_url,
-        'logo_footer_url': logo_footer_url,
+        'brand_logo_url': static('images/brand_logo.PNG'),
+        'logo_footer_url': static('images/logo_footer.png'),
     }
 
 def announcement_processor(request):

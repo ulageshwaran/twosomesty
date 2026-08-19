@@ -1,32 +1,27 @@
+"""
+cloudinary_tags.py — Image URL helpers (storage-backend agnostic).
+
+After migrating from Cloudinary to Cloudflare R2, on-the-fly URL transforms
+are no longer available. The filters below return the raw URL from whatever
+storage backend is active.
+
+For R2:
+  - `cloudinary_optimize` → returns image.url as-is (no transform injected)
+  - `cloudinary_srcset`   → returns a srcset with the same URL at all widths
+                            (browser will still download the same file; add
+                             Cloudflare Image Resizing later for true srcset)
+
+Template usage is unchanged — no template edits needed.
+"""
+
 from django import template
 from django.utils.safestring import mark_safe
 
 register = template.Library()
 
 
-def _build_cloudinary_url(url, width=None, height=None, crop="limit", quality="auto", fetch_format="auto", extra=None):
-    """
-    Core helper: inject Cloudinary transformation params into a /upload/ URL.
-    Always uses q_auto and f_auto unless overridden.
-    """
-    if not url or 'res.cloudinary.com' not in url or '/upload/' not in url:
-        return url or ''
-
-    params = [f"f_{fetch_format}", f"q_{quality}"]
-    if width:
-        params.append(f"w_{width}")
-    if height:
-        params.append(f"h_{height}")
-    if crop:
-        params.append(f"c_{crop}")
-    if extra:
-        params.extend(extra if isinstance(extra, list) else [extra])
-
-    return url.replace('/upload/', f'/upload/{",".join(params)}/')
-
-
 def _get_url(image_or_url):
-    """Extract a raw URL string from either a field or a plain string."""
+    """Extract a raw URL string from either an ImageField or a plain string."""
     if not image_or_url:
         return ''
     if hasattr(image_or_url, 'url'):
@@ -36,70 +31,55 @@ def _get_url(image_or_url):
 
 # ---------------------------------------------------------------------------
 # Filter: {{ image_field|cloudinary_optimize:"w_300" }}
-# Accepts comma-separated Cloudinary params as the filter arg.
-# Always injects f_auto,q_auto first; caller can override q by passing q_xx.
+# Returns the raw storage URL (Cloudflare R2 or local) unchanged.
+# The filter argument is accepted but ignored for non-Cloudinary backends.
 # ---------------------------------------------------------------------------
 @register.filter(name='cloudinary_optimize')
 def cloudinary_optimize(image_or_url, args=""):
     """
-    Transforms Cloudinary image URLs with automatic quality & format selection.
-    Defaults: f_auto, q_auto.  Additional params are appended.
+    Returns the image URL from the active storage backend.
 
-    Usage:
+    Previously injected Cloudinary URL transformation parameters (width,
+    quality, format). Now returns the URL unchanged for any backend.
+
+    Usage (unchanged from before):
         {{ product.images.first.image|cloudinary_optimize:"w_300" }}
-        {{ product.images.first.image|cloudinary_optimize:"w_800,c_fill" }}
     """
-    url = _get_url(image_or_url)
-    if not url or 'res.cloudinary.com' not in url or '/upload/' not in url:
-        return url
-
-    # Always start with f_auto,q_auto; caller args are appended after
-    base_params = ["f_auto", "q_auto"]
-    if args:
-        base_params.extend(args.split(','))
-
-    transform_str = ','.join(base_params)
-    return url.replace('/upload/', f'/upload/{transform_str}/')
+    return _get_url(image_or_url)
 
 
 # ---------------------------------------------------------------------------
 # Simple tag: {% cloudinary_url image_field width=300 %}
-# Returns a plain URL string.
+# Returns a plain URL string (same URL regardless of width arg).
 # ---------------------------------------------------------------------------
 @register.simple_tag
-def cloudinary_url(image_field, width=None, height=None, crop="limit", quality="auto", fetch_format="auto"):
+def cloudinary_url(image_field, width=None, height=None, crop="limit",
+                   quality="auto", fetch_format="auto"):
     """
-    Generates an optimised Cloudinary URL string (q_auto, f_auto by default).
-
-    Usage:
-        {% cloudinary_url product.images.first.image width=300 %}
+    Returns the storage URL for the given image field.
+    Width/height/quality args are accepted for template compatibility but ignored.
     """
-    url = _get_url(image_field)
-    return _build_cloudinary_url(url, width=width, height=height, crop=crop,
-                                  quality=quality, fetch_format=fetch_format)
+    return _get_url(image_field)
 
 
 # ---------------------------------------------------------------------------
 # Simple tag: {% cloudinary_srcset image_field widths="300,600,900" %}
-# Returns a ready-to-use srcset attribute value string.
+# Returns a srcset string. Without Cloudflare Image Resizing all descriptors
+# point to the same URL — the browser still benefits from the sizes= hint
+# for layout. Enable Cloudflare Image Resizing later for true multi-size srcset.
 # ---------------------------------------------------------------------------
 @register.simple_tag
-def cloudinary_srcset(image_field, widths="300,600,900", quality="auto", fetch_format="auto", crop="limit"):
+def cloudinary_srcset(image_field, widths="300,600,900", quality="auto",
+                      fetch_format="auto", crop="limit"):
     """
-    Generates a srcset attribute value for responsive images.
+    Generates a srcset attribute value.
+    All widths currently resolve to the same R2 URL.
 
     Usage:
         srcset="{% cloudinary_srcset product.images.first.image widths='300,600,900' %}"
     """
     url = _get_url(image_field)
-    if not url or 'res.cloudinary.com' not in url or '/upload/' not in url:
-        return url
-
-    parts = []
-    for w in widths.split(','):
-        w = w.strip()
-        if w:
-            transformed = _build_cloudinary_url(url, width=int(w), crop=crop,
-                                                  quality=quality, fetch_format=fetch_format)
-            parts.append(f"{transformed} {w}w")
+    if not url:
+        return ''
+    parts = [f"{url} {w.strip()}w" for w in widths.split(',') if w.strip()]
     return mark_safe(', '.join(parts))

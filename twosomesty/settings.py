@@ -66,13 +66,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary_storage',
-    'cloudinary',
+    'storages',
     # Third party apps
     'rest_framework',
     # Local apps
     'store.apps.StoreConfig',
-    'django.contrib.sites',  
+    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -159,7 +158,7 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = '/media/'
+# MEDIA_URL is overridden below by AWS_S3_CUSTOM_DOMAIN when R2 is configured
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
@@ -188,21 +187,37 @@ CALLMEBOT_APIKEY = os.getenv('CALLMEBOT_APIKEY')
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
-}
+# ---------------------------------------------------------------------------
+# Cloudflare R2 Media Storage (S3-compatible via django-storages + boto3)
+# ---------------------------------------------------------------------------
+AWS_ACCESS_KEY_ID = os.getenv('R2_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('R2_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('R2_BUCKET_NAME')
+AWS_S3_ENDPOINT_URL = os.getenv('R2_ENDPOINT_URL')  # https://<account>.r2.cloudflarestorage.com
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_ADDRESSING_STYLE = 'path'  # R2 requires path-style addressing
+AWS_DEFAULT_ACL = None            # R2 does not use ACLs
+AWS_QUERYSTRING_AUTH = False      # Public bucket — no signed URLs needed
+AWS_S3_FILE_OVERWRITE = False     # Never silently overwrite existing files
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# R2 public access URL (your r2.dev domain or custom domain)
+_R2_PUBLIC_URL = os.getenv('R2_PUBLIC_URL', '')  # e.g. https://pub-xxxx.r2.dev
+if _R2_PUBLIC_URL:
+    # Strip trailing slash; django-storages prepends bucket name in custom domain mode
+    AWS_S3_CUSTOM_DOMAIN = _R2_PUBLIC_URL.replace('https://', '').rstrip('/')
+    MEDIA_URL = f'{_R2_PUBLIC_URL}/'
+else:
+    MEDIA_URL = '/media/'  # local fallback (R2 not configured)
 
 STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    'default': {
+        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+        'OPTIONS': {
+            'location': '',   # files go in bucket root; upload_to= paths come from model fields
+        },
     },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
     },
 }
 
