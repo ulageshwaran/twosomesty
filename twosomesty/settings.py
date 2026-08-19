@@ -197,6 +197,7 @@ AWS_STORAGE_BUCKET_NAME = os.getenv('R2_BUCKET_NAME')
 AWS_S3_ENDPOINT_URL = os.getenv('R2_ENDPOINT_URL')  # https://<account>.r2.cloudflarestorage.com
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_ADDRESSING_STYLE = 'path'  # R2 requires path-style addressing
+AWS_S3_REGION_NAME = "auto"
 AWS_DEFAULT_ACL = None            # R2 does not use ACLs
 AWS_QUERYSTRING_AUTH = False      # Public bucket — no signed URLs needed
 AWS_S3_FILE_OVERWRITE = False     # Never silently overwrite existing files
