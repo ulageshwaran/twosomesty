@@ -15,6 +15,7 @@ import os
 # pyrefly: ignore [missing-import]
 import dj_database_url
 from dotenv import load_dotenv
+from botocore.config import Config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -208,6 +209,12 @@ if _R2_PUBLIC_URL:
     MEDIA_URL = f'{_R2_PUBLIC_URL}/'
 else:
     MEDIA_URL = '/media/'  # local fallback (R2 not configured)
+
+AWS_S3_CLIENT_CONFIG = Config(
+    signature_version="s3v4",
+    request_checksum_calculation="when_required",
+    response_checksum_validation="when_required",
+)
 
 STORAGES = {
     'default': {
